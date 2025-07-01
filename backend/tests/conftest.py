@@ -3,16 +3,16 @@ Pytest configuration and fixtures for backend tests
 """
 
 import asyncio
+
 import pytest
 import pytest_asyncio
+from app.database import get_db
+from app.main import app
+from app.models.base import Base
 from httpx import AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
-from app.main import app
-from app.database import get_db
-from app.models.base import Base
 
 # Test database URL (in-memory SQLite for speed)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"

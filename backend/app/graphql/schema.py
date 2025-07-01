@@ -3,10 +3,10 @@ GymIntel GraphQL Schema
 Advanced gym discovery platform with intelligent confidence scoring
 """
 
-import strawberry
-from typing import List, Optional
 from datetime import datetime
-from dataclasses import dataclass
+from typing import List, Optional
+
+import strawberry
 
 
 @strawberry.type
@@ -330,7 +330,8 @@ class Subscription:
 
         await asyncio.sleep(1)
         # This is a placeholder that would never actually yield
-        # In a real implementation, this would connect to a message queue or database changes
+        # In a real implementation, this would connect to a message queue or
+        # database changes
         return  # This will never execute, but satisfies the type checker
         yield  # Unreachable code, but keeps the async generator signature
 

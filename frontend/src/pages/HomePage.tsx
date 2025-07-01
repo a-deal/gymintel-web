@@ -59,7 +59,7 @@ export const HomePage: React.FC = () => {
               Intelligent Gym Discovery
             </h1>
             <p className="text-xl md:text-2xl mb-12 text-blue-100 max-w-3xl mx-auto">
-              Advanced gym intelligence platform with AI-powered confidence scoring, 
+              Advanced gym intelligence platform with AI-powered confidence scoring,
               multi-source data aggregation, and real-time business analytics.
             </p>
 

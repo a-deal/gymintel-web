@@ -3,21 +3,19 @@ CLI Bridge Service - Import data from GymIntel CLI
 Integrates the stable CLI tool with web application database
 """
 
-import sys
-import os
-import json
 import asyncio
-from typing import List, Dict, Any, Optional
+import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add CLI services to Python path
 CLI_PATH = Path(__file__).parent.parent.parent.parent.parent / "gymintel-cli" / "src"
 sys.path.insert(0, str(CLI_PATH))
 
 try:
-    from run_gym_search import run_gym_search, run_metro_search, run_batch_search
     from metro_areas import get_metro_area, list_metro_areas
+    from run_gym_search import run_gym_search, run_metro_search
 
     CLI_AVAILABLE = True
 except ImportError:

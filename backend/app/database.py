@@ -3,17 +3,18 @@ Database configuration and session management
 """
 
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from contextlib import asynccontextmanager
+
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from contextlib import asynccontextmanager
 
 from .models.gym import Base
 
 # Database configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:password@localhost/gymintel_web"
+    "DATABASE_URL",
+    "postgresql://gymintel:gymintel_dev@database:5432/gymintel",  # pragma: allowlist secret  # noqa: E501
 )
 
 # Convert to async URL if needed

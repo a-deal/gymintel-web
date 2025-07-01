@@ -8,7 +8,7 @@ echo
 echo "🛑 Stopping all test processes..."
 # Kill any Python development servers
 pkill -f "uvicorn app.main:app" 2>/dev/null
-pkill -f "python test_server.py" 2>/dev/null  
+pkill -f "python test_server.py" 2>/dev/null
 pkill -f "python start_dev.py" 2>/dev/null
 pkill -f "python run_server.py" 2>/dev/null
 
@@ -40,7 +40,7 @@ fi
 
 echo "📊 Port status:"
 echo "Port 3000: $(lsof -ti:3000 2>/dev/null || echo 'Available')"
-echo "Port 8000: $(lsof -ti:8000 2>/dev/null || echo 'Available')" 
+echo "Port 8000: $(lsof -ti:8000 2>/dev/null || echo 'Available')"
 echo "Port 8001: $(lsof -ti:8001 2>/dev/null || echo 'Available')"
 echo "Port 8002: $(lsof -ti:8002 2>/dev/null || echo 'Available')"
 echo "Port 8003: $(lsof -ti:8003 2>/dev/null || echo 'Available')"

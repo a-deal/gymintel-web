@@ -3,27 +3,21 @@ GraphQL Resolvers Implementation
 """
 
 import json
-from typing import List, Optional
 from datetime import datetime
-from sqlalchemy import select, func, and_, or_
+from typing import List, Optional
+
+from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
-from geoalchemy2.functions import ST_DWithin, ST_GeogFromText, ST_Distance
 
 from ..database import get_db_session
-from ..models.gym import Gym, DataSource, Review
+from ..models.gym import DataSource, Gym
 from ..services.cli_bridge import cli_bridge_service
-from .schema import (
-    SearchResult,
-    Gym as GymType,
-    GymAnalytics,
-    MarketGap,
-    MetropolitanArea,
-    ImportResult,
-    Coordinates,
-    DataSource as DataSourceType,
-    Review as ReviewType,
-    SearchFilters,
-)
+from .schema import Coordinates
+from .schema import DataSource as DataSourceType
+from .schema import Gym as GymType
+from .schema import GymAnalytics, ImportResult, MarketGap, MetropolitanArea
+from .schema import Review as ReviewType
+from .schema import SearchFilters, SearchResult
 
 
 class GymResolvers:
@@ -182,7 +176,7 @@ class GymResolvers:
                 use_google=search_info["use_google"],
             )
 
-        except Exception as e:
+        except Exception:
             # Return empty result on error
             return SearchResult(
                 zipcode=zipcode,
@@ -321,7 +315,9 @@ class GymResolvers:
                 gap_score=0.75,
                 population_density=1500.0,
                 nearest_gym_distance=2.5,
-                reasoning="High population density with limited gym options within 2 miles",
+                reasoning=(
+                    "High population density with limited gym options within 2 miles"
+                ),
             )
         ]
 
@@ -357,7 +353,9 @@ class GymResolvers:
                         instagram=gym_data.get("instagram"),
                         latitude=gym_data["latitude"],
                         longitude=gym_data["longitude"],
-                        location=f"POINT({gym_data['longitude']} {gym_data['latitude']})",
+                        location=(
+                            f"POINT({gym_data['longitude']} {gym_data['latitude']})"
+                        ),
                         confidence=gym_data["confidence"],
                         match_confidence=gym_data["confidence"],
                         rating=gym_data.get("rating"),
@@ -543,7 +541,9 @@ class MutationResolvers:
                                 instagram=gym_data.instagram,
                                 latitude=gym_data.latitude,
                                 longitude=gym_data.longitude,
-                                location=f"POINT({gym_data.longitude} {gym_data.latitude})",
+                                location=(
+                                    f"POINT({gym_data.longitude} {gym_data.latitude})"
+                                ),
                                 confidence=gym_data.confidence,
                                 match_confidence=gym_data.confidence,
                                 rating=gym_data.rating,

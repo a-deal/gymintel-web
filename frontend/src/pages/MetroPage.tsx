@@ -7,9 +7,9 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { LIST_METROPOLITAN_AREAS, GET_METROPOLITAN_AREA, GET_GYMS_BY_METRO } from '../graphql/queries';
-import { 
-  BuildingOfficeIcon, 
-  MapPinIcon, 
+import {
+  BuildingOfficeIcon,
+  MapPinIcon,
   UsersIcon,
   ChartBarIcon,
   ArrowRightIcon
@@ -23,7 +23,7 @@ export const MetroPage: React.FC = () => {
   const [showGyms, setShowGyms] = useState(false);
 
   const { data: metroListData, loading: metroListLoading } = useQuery(LIST_METROPOLITAN_AREAS);
-  
+
   const { data: metroData, loading: metroLoading } = useQuery(
     GET_METROPOLITAN_AREA,
     {

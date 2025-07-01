@@ -6,10 +6,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Map, { Marker, NavigationControl, ScaleControl, GeolocateControl } from 'react-map-gl';
 import { Gym, Coordinates } from '../types/gym';
-import { 
-  MapPinIcon, 
+import {
+  MapPinIcon,
   InformationCircleIcon,
-  XMarkIcon 
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
@@ -23,11 +23,11 @@ interface MapViewProps {
   onGymClick?: (gym: Gym) => void;
 }
 
-export const MapView: React.FC<MapViewProps> = ({ 
-  gyms, 
-  center, 
-  radius, 
-  onGymClick 
+export const MapView: React.FC<MapViewProps> = ({
+  gyms,
+  center,
+  radius,
+  onGymClick
 }) => {
   const mapRef = useRef<any>(null);
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
@@ -84,7 +84,7 @@ export const MapView: React.FC<MapViewProps> = ({
               </div>
             </div>
           </div>
-          
+
           {/* Gym List Fallback */}
           <div className="mt-6 max-w-md mx-auto">
             <h4 className="text-sm font-medium text-gray-900 mb-3">
@@ -92,7 +92,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </h4>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {gyms.map((gym) => (
-                <div 
+                <div
                   key={gym.id}
                   className="text-left bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleGymClick(gym)}
@@ -171,7 +171,7 @@ export const MapView: React.FC<MapViewProps> = ({
               <p className="text-sm text-gray-600 mt-1">
                 {selectedGym.address}
               </p>
-              
+
               {selectedGym.rating && (
                 <div className="flex items-center mt-2">
                   <div className="flex items-center">
@@ -187,7 +187,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   )}
                 </div>
               )}
-              
+
               <div className="flex items-center mt-2">
                 <span className={clsx(
                   'inline-block w-2 h-2 rounded-full mr-2',
@@ -198,7 +198,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 </span>
               </div>
             </div>
-            
+
             <button
               onClick={() => setSelectedGym(null)}
               className="ml-2 text-gray-400 hover:text-gray-600 p-1"
@@ -206,7 +206,7 @@ export const MapView: React.FC<MapViewProps> = ({
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
-          
+
           {(selectedGym.phone || selectedGym.website) && (
             <div className="mt-4 pt-3 border-t border-gray-200 space-y-2">
               {selectedGym.phone && (

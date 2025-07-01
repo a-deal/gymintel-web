@@ -4,7 +4,6 @@ Development server launcher for GymIntel Web
 """
 
 import uvicorn
-from app.main import app
 
 if __name__ == "__main__":
     print("🏋️ GymIntel Web - Development Server")

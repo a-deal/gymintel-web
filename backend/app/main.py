@@ -3,13 +3,12 @@ GymIntel Web Application - FastAPI + GraphQL Backend
 High-performance gym discovery platform with PostgreSQL and real-time updates
 """
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
-import uvicorn
 
 from .graphql.schema import schema
-
 
 # Create FastAPI application
 app = FastAPI(

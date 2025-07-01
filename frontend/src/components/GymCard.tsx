@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { Gym } from '../types/gym';
-import { 
-  MapPinIcon, 
-  PhoneIcon, 
+import {
+  MapPinIcon,
+  PhoneIcon,
   GlobeAltIcon,
   StarIcon,
   ShieldCheckIcon,
@@ -83,7 +83,7 @@ export const GymCard: React.FC<GymCardProps> = ({ gym, onClick }) => {
             <span className="truncate">{gym.address}</span>
           </div>
         </div>
-        
+
         {/* Confidence Badge */}
         <div className={clsx(
           'ml-4 px-2 py-1 rounded-full text-xs font-medium border',
@@ -118,7 +118,7 @@ export const GymCard: React.FC<GymCardProps> = ({ gym, onClick }) => {
         {gym.phone && (
           <div className="flex items-center text-sm text-gray-600">
             <PhoneIcon className="h-4 w-4 mr-2 text-gray-400" />
-            <a 
+            <a
               href={`tel:${gym.phone}`}
               className="hover:text-gym-blue-600 transition-colors"
               onClick={(e) => e.stopPropagation()}
@@ -127,11 +127,11 @@ export const GymCard: React.FC<GymCardProps> = ({ gym, onClick }) => {
             </a>
           </div>
         )}
-        
+
         {gym.website && (
           <div className="flex items-center text-sm text-gray-600">
             <GlobeAltIcon className="h-4 w-4 mr-2 text-gray-400" />
-            <a 
+            <a
               href={gym.website}
               target="_blank"
               rel="noopener noreferrer"
@@ -172,7 +172,7 @@ export const GymCard: React.FC<GymCardProps> = ({ gym, onClick }) => {
           <CalendarIcon className="h-3 w-3 mr-1" />
           Updated {new Date(gym.updatedAt).toLocaleDateString()}
         </div>
-        
+
         {gym.sourceZipcode && (
           <span className="text-xs text-gray-500">
             Source: {gym.sourceZipcode}

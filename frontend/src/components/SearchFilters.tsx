@@ -6,7 +6,7 @@
 import React from 'react';
 import { Switch } from '@headlessui/react';
 import { SearchFilters as SearchFiltersType } from '../types/gym';
-import { 
+import {
   AdjustmentsHorizontalIcon,
   StarIcon,
   ShieldCheckIcon,
@@ -19,9 +19,9 @@ interface SearchFiltersProps {
   onFiltersChange: (filters: SearchFiltersType) => void;
 }
 
-export const SearchFilters: React.FC<SearchFiltersProps> = ({ 
-  filters, 
-  onFiltersChange 
+export const SearchFilters: React.FC<SearchFiltersProps> = ({
+  filters,
+  onFiltersChange
 }) => {
   const updateFilter = (key: keyof SearchFiltersType, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -48,7 +48,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             </span>
           )}
         </div>
-        
+
         {activeFiltersCount > 0 && (
           <button
             onClick={clearFilters}

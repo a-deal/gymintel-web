@@ -2,23 +2,14 @@
 Gym-related database models
 """
 
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Float,
-    DateTime,
-    Text,
-    Boolean,
-    ForeignKey,
-    JSON,
-)
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
-from geoalchemy2 import Geometry
 import uuid
 from datetime import datetime
+
+from geoalchemy2 import Geometry
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -129,4 +120,7 @@ class Review(Base):
     gym = relationship("Gym", back_populates="reviews")
 
     def __repr__(self):
-        return f"<Review(source='{self.source}', rating={self.rating}, count={self.review_count})>"
+        return (
+            f"<Review(source='{self.source}', rating={self.rating}, "
+            f"count={self.review_count})>"
+        )
