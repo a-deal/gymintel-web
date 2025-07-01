@@ -50,9 +50,7 @@ class Settings(BaseSettings):
     # Redis (optional)
     redis_url: Optional[str] = None
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = {"env_file": ".env", "case_sensitive": False}
 
     @property
     def async_database_url(self) -> str:
