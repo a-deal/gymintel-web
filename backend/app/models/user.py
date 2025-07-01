@@ -7,10 +7,10 @@ from datetime import datetime
 
 from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+# Import Base from gym module
+from .gym import Base
 
 
 class User(Base):

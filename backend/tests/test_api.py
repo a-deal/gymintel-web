@@ -7,6 +7,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_root_endpoint(async_client: AsyncClient):
     """Test the root API endpoint."""
     response = await async_client.get("/")
@@ -20,6 +21,7 @@ async def test_root_endpoint(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_health_check(async_client: AsyncClient):
     """Test the health check endpoint."""
     response = await async_client.get("/health")
@@ -31,6 +33,7 @@ async def test_health_check(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_graphql_endpoint_accessible(async_client: AsyncClient):
     """Test that GraphQL endpoint is accessible."""
     response = await async_client.get("/graphql")

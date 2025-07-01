@@ -6,24 +6,24 @@ import asyncio
 
 import pytest
 import pytest_asyncio
+from app.config import get_settings
 from app.database import get_db
 from app.main import app
-from app.models.gym import Base
 from httpx import AsyncClient
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
-# Test database URL (in-memory SQLite for speed)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+# Get test database URL from settings
+settings = get_settings()
+TEST_DATABASE_URL = settings.async_test_database_url
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
+# Create async test engine
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+
+# Create async session factory for tests
+TestingSessionLocal = sessionmaker(
+    test_engine, class_=AsyncSession, expire_on_commit=False
 )
-
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 @pytest.fixture(scope="session")
@@ -34,27 +34,34 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="function")
-def db_session():
+@pytest_asyncio.fixture(scope="function")
+async def db_session():
     """Create a fresh database session for each test."""
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        Base.metadata.drop_all(bind=engine)
+    # Create tables
+    async with test_engine.begin() as conn:
+        # Import Base after engine is created
+        from app.models.gym import Base
+
+        await conn.run_sync(Base.metadata.create_all)
+
+    # Create session
+    async with TestingSessionLocal() as session:
+        yield session
+        await session.rollback()
+
+    # Drop tables after test
+    async with test_engine.begin() as conn:
+        from app.models.gym import Base
+
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture(scope="function")
 def override_get_db(db_session):
     """Override the get_db dependency with test database."""
 
-    def _override_get_db():
-        try:
-            yield db_session
-        finally:
-            pass
+    async def _override_get_db():
+        yield db_session
 
     app.dependency_overrides[get_db] = _override_get_db
     yield

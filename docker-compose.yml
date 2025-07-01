@@ -6,9 +6,9 @@ services:
     image: postgis/postgis:15-3.3
     container_name: gymintel-db
     environment:
-      POSTGRES_USER: gymintel
-      POSTGRES_PASSWORD: gymintel_dev  # pragma: allowlist secret
-      POSTGRES_DB: gymintel
+      POSTGRES_USER: ${DATABASE_USER:-gymintel}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-gymintel_dev}
+      POSTGRES_DB: ${DATABASE_NAME:-gymintel}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5432:5432"
@@ -28,10 +28,14 @@ services:
       dockerfile: Dockerfile.dev
     container_name: gymintel-backend
     environment:
-      - DATABASE_URL=postgresql://gymintel:gymintel_dev@database:5432/gymintel
+      - DATABASE_HOST=database
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=${DATABASE_NAME:-gymintel}
+      - DATABASE_USER=${DATABASE_USER:-gymintel}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-gymintel_dev}
       - YELP_API_KEY=${YELP_API_KEY}
       - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
-      - ENVIRONMENT=development
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     ports:
       - "8000:8000"
     volumes:

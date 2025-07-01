@@ -8,9 +8,9 @@ from datetime import datetime
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, DateTime, Float, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+# Import Base from gym module
+from .gym import Base
 
 
 class MetropolitanArea(Base):

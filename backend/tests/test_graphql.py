@@ -7,6 +7,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_graphql_schema_introspection(async_client: AsyncClient):
     """Test GraphQL schema introspection query."""
     query = """
@@ -30,6 +31,7 @@ async def test_graphql_schema_introspection(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_list_metropolitan_areas_query(async_client: AsyncClient):
     """Test the listMetropolitanAreas GraphQL query."""
     query = """
@@ -53,6 +55,7 @@ async def test_list_metropolitan_areas_query(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.database
 async def test_invalid_graphql_query(async_client: AsyncClient):
     """Test handling of invalid GraphQL queries."""
     query = """

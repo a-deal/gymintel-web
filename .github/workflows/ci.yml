@@ -106,7 +106,12 @@ jobs:
 
       - name: Run backend tests
         env:
-          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/test_gymintel  # pragma: allowlist secret
+          TEST_DATABASE_HOST: localhost
+          TEST_DATABASE_PORT: 5432
+          TEST_DATABASE_NAME: test_gymintel
+          TEST_DATABASE_USER: testuser
+          TEST_DATABASE_PASSWORD: testpass  # pragma: allowlist secret
+          ENVIRONMENT: testing
         run: |
           cd backend
           pytest --cov=app --cov-report=xml
@@ -147,14 +152,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file  # pragma: allowlist secret
+      - name: Create .env file
         run: |
           cat > .env << EOF
           # Test environment variables
-          DATABASE_URL=postgresql://postgres:testpass@database:5432/gymintel  # pragma: allowlist secret
+          DATABASE_HOST=database
+          DATABASE_PORT=5432
+          DATABASE_NAME=gymintel
+          DATABASE_USER=postgres
+          DATABASE_PASSWORD=testpass
           YELP_API_KEY=test-key
           GOOGLE_PLACES_API_KEY=test-key
           MAPBOX_ACCESS_TOKEN=test-token
+          ENVIRONMENT=testing
           EOF
 
       - name: Start services with Docker Compose

@@ -155,3 +155,6 @@ ipython_config.py
 *.njsproj
 *.sln
 *.sw?
+
+# Test environment
+backend/.env.test
