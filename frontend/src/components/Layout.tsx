@@ -2,7 +2,6 @@
  * Layout Component - Main application layout with navigation
  */
 
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   MapIcon,

@@ -56,7 +56,7 @@ export const apolloClient = new ApolloClient({
         fields: {
           searchGyms: {
             keyArgs: ['zipcode', 'radius'],
-            merge(existing, incoming) {
+            merge(_existing, incoming) {
               return incoming;
             },
           },
@@ -71,12 +71,12 @@ export const apolloClient = new ApolloClient({
       Gym: {
         fields: {
           sources: {
-            merge(existing = [], incoming) {
+            merge(_existing = [], incoming) {
               return incoming;
             },
           },
           reviews: {
-            merge(existing = [], incoming) {
+            merge(_existing = [], incoming) {
               return incoming;
             },
           },

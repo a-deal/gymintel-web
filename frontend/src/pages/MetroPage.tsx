@@ -3,7 +3,7 @@
  * Uses Tailwind UI list and detail patterns
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { LIST_METROPOLITAN_AREAS, GET_METROPOLITAN_AREA, GET_GYMS_BY_METRO } from '../graphql/queries';

@@ -3,7 +3,7 @@
  * Uses Mapbox GL JS with Tailwind UI patterns
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Map, { Marker, NavigationControl, ScaleControl, GeolocateControl } from 'react-map-gl';
 import { Gym, Coordinates } from '../types/gym';
 import {

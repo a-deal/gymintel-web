@@ -3,7 +3,6 @@
  * Uses Tailwind UI card patterns with confidence scoring
  */
 
-import React from 'react';
 import { Gym } from '../types/gym';
 import {
   MapPinIcon,

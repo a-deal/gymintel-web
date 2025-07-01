@@ -3,7 +3,7 @@
  * Uses Tailwind UI dashboard patterns with Recharts
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_GYM_ANALYTICS, MARKET_GAP_ANALYSIS } from '../graphql/queries';
 import {

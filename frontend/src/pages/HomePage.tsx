@@ -2,7 +2,7 @@
  * Home Page - Landing page with quick search and overview
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLazyQuery } from '@apollo/client';
 import { SEARCH_GYMS } from '../graphql/queries';

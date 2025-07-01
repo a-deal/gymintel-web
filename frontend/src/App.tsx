@@ -2,7 +2,6 @@
  * GymIntel Web Application - Main App Component
  */
 
-import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { apolloClient } from './lib/apollo';

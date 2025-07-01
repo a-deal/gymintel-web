@@ -3,7 +3,6 @@
  * Uses Tailwind UI form patterns with Headless UI components
  */
 
-import React from 'react';
 import { Switch } from '@headlessui/react';
 import { SearchFilters as SearchFiltersType } from '../types/gym';
 import {

@@ -2,7 +2,7 @@
  * Search Page - Main gym search interface with filters and results
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { SEARCH_GYMS } from '../graphql/queries';
