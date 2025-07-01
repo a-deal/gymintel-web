@@ -7,7 +7,7 @@ services:
     container_name: gymintel-db
     environment:
       POSTGRES_USER: gymintel
-      POSTGRES_PASSWORD: gymintel_dev
+      POSTGRES_PASSWORD: gymintel_dev  # pragma: allowlist secret
       POSTGRES_DB: gymintel
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:

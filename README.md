@@ -81,11 +81,11 @@ type Query {
     radius: Float = 10
     limit: Int = 50
   ): SearchResult!
-  
+
   # Metropolitan area queries
   metropolitanArea(code: String!): MetropolitanArea
   listMetropolitanAreas: [MetropolitanArea!]!
-  
+
   # Analytics queries
   gymAnalytics(zipcode: String!): GymAnalytics!
   marketGapAnalysis(zipcode: String!): [MarketGap!]!
@@ -94,7 +94,7 @@ type Query {
 type Mutation {
   # Import data from CLI
   importGymData(zipcode: String!, data: GymDataInput!): ImportResult!
-  
+
   # User preferences
   saveSearch(zipcode: String!, radius: Float): SavedSearch!
 }
@@ -159,7 +159,7 @@ npm run dev
 ### **Environment Variables**
 ```bash
 # Backend (.env)
-DATABASE_URL=postgresql://user:password@localhost/gymintel
+DATABASE_URL=postgresql://user:password@localhost/gymintel  # pragma: allowlist secret
 YELP_API_KEY=your_yelp_key
 GOOGLE_PLACES_API_KEY=your_google_key
 MAPBOX_ACCESS_TOKEN=your_mapbox_token

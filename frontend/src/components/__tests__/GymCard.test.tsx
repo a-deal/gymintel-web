@@ -21,7 +21,7 @@ const mockGym = {
 describe('GymCard', () => {
   it('renders gym information correctly', () => {
     render(<GymCard gym={mockGym} />)
-    
+
     expect(screen.getByText('Test Gym')).toBeInTheDocument()
     expect(screen.getByText('123 Main St, Test City, TC 12345')).toBeInTheDocument()
     expect(screen.getByText('(555) 123-4567')).toBeInTheDocument()

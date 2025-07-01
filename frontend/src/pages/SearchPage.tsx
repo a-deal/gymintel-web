@@ -10,11 +10,11 @@ import { GymCard } from '../components/GymCard';
 import { SearchFilters } from '../components/SearchFilters';
 import { MapView } from '../components/MapView';
 import { SearchFilters as SearchFiltersType } from '../types/gym';
-import { 
-  MagnifyingGlassIcon, 
-  MapIcon, 
+import {
+  MagnifyingGlassIcon,
+  MapIcon,
   ListBulletIcon,
-  AdjustmentsHorizontalIcon 
+  AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 
 export const SearchPage: React.FC = () => {
@@ -61,8 +61,8 @@ export const SearchPage: React.FC = () => {
             <button
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-md ${
-                viewMode === 'list' 
-                  ? 'bg-blue-100 text-blue-600' 
+                viewMode === 'list'
+                  ? 'bg-blue-100 text-blue-600'
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
@@ -71,8 +71,8 @@ export const SearchPage: React.FC = () => {
             <button
               onClick={() => setViewMode('map')}
               className={`p-2 rounded-md ${
-                viewMode === 'map' 
-                  ? 'bg-blue-100 text-blue-600' 
+                viewMode === 'map'
+                  ? 'bg-blue-100 text-blue-600'
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
@@ -81,8 +81,8 @@ export const SearchPage: React.FC = () => {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`p-2 rounded-md ${
-                showFilters 
-                  ? 'bg-blue-100 text-blue-600' 
+                showFilters
+                  ? 'bg-blue-100 text-blue-600'
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
@@ -131,9 +131,9 @@ export const SearchPage: React.FC = () => {
         {/* Search Stats */}
         {searchResult && (
           <div className="mt-4 text-sm text-gray-600">
-            Found {searchResult.totalResults} gyms in {zipcode} ({radius} mile radius) • 
-            {searchResult.mergedCount} merged records • 
-            {Math.round(searchResult.avgConfidence * 100)}% avg confidence • 
+            Found {searchResult.totalResults} gyms in {zipcode} ({radius} mile radius) •
+            {searchResult.mergedCount} merged records •
+            {Math.round(searchResult.avgConfidence * 100)}% avg confidence •
             {searchResult.executionTimeSeconds.toFixed(1)}s
           </div>
         )}
@@ -143,9 +143,9 @@ export const SearchPage: React.FC = () => {
         {/* Filters Sidebar */}
         {showFilters && (
           <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
-            <SearchFilters 
-              filters={filters} 
-              onFiltersChange={setFilters} 
+            <SearchFilters
+              filters={filters}
+              onFiltersChange={setFilters}
             />
           </div>
         )}
@@ -183,8 +183,8 @@ export const SearchPage: React.FC = () => {
           )}
 
           {viewMode === 'map' && gyms.length > 0 && (
-            <MapView 
-              gyms={gyms} 
+            <MapView
+              gyms={gyms}
               center={searchResult?.coordinates}
               radius={radius}
             />

@@ -1,0 +1,204 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run ESLint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run TypeScript type check
+        run: |
+          cd frontend
+          npm run type-check
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm run test -- --coverage
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpass  # pragma: allowlist secret
+          POSTGRES_USER: testuser
+          POSTGRES_DB: test_gymintel
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run code formatting check (Black)
+        run: |
+          cd backend
+          black --check .
+
+      - name: Run import sorting check (isort)
+        run: |
+          cd backend
+          isort --check-only .
+
+      - name: Run linting (flake8)
+        run: |
+          cd backend
+          flake8 .
+
+      - name: Run backend tests
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/test_gymintel  # pragma: allowlist secret
+        run: |
+          cd backend
+          pytest --cov=app --cov-report=xml
+
+      - name: Upload backend coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend Docker image
+        run: |
+          docker build -f frontend/Dockerfile frontend/
+
+      - name: Build backend Docker image
+        run: |
+          docker build -f backend/Dockerfile backend/
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file  # pragma: allowlist secret
+        run: |
+          cat > .env << EOF
+          # Test environment variables
+          DATABASE_URL=postgresql://postgres:testpass@database:5432/gymintel  # pragma: allowlist secret
+          YELP_API_KEY=test-key
+          GOOGLE_PLACES_API_KEY=test-key
+          MAPBOX_ACCESS_TOKEN=test-token
+          EOF
+
+      - name: Start services with Docker Compose
+        run: docker compose up -d --build
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to start..."
+          sleep 30
+
+          # Check backend health
+          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:8000/health
+
+      - name: Run integration tests
+        run: |
+          # Test GraphQL endpoint
+          curl -X POST http://localhost:8000/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query": "query { __typename }"}'
+
+          # Test frontend is serving
+          curl -f http://localhost:3000
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

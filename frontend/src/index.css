@@ -10,12 +10,12 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     font-variation-settings: normal;
   }
-  
+
   /* Apply JetBrains Mono to headings */
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }
-  
+
   /* Body text uses monospace */
   body {
     @apply font-sans;
@@ -27,11 +27,11 @@
   .slider {
     @apply bg-gray-200 rounded-lg appearance-none cursor-pointer;
   }
-  
+
   .slider::-webkit-slider-thumb {
     @apply appearance-none w-5 h-5 bg-gym-blue-600 rounded-full cursor-pointer;
   }
-  
+
   .slider::-moz-range-thumb {
     @apply w-5 h-5 bg-gym-blue-600 rounded-full cursor-pointer border-0;
   }
@@ -40,7 +40,7 @@
   .mapboxgl-ctrl-group button {
     @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50;
   }
-  
+
   .mapboxgl-popup-content {
     @apply bg-white rounded-lg shadow-lg border border-gray-200 p-0;
   }
@@ -51,16 +51,16 @@
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }
-  
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  
+
   @keyframes slideUp {
     from {
       transform: translateY(10px);

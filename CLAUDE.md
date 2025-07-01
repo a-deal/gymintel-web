@@ -25,7 +25,7 @@ gymintel-web/
 │   │   ├── models/            # SQLAlchemy + PostGIS models
 │   │   ├── services/          # Business logic & CLI bridge
 │   │   └── main.py            # FastAPI application
-│   ├── migrations/            # Alembic database migrations  
+│   ├── migrations/            # Alembic database migrations
 │   └── requirements.txt       # Python dependencies
 ├── frontend/                  # React + TypeScript app
 │   ├── src/
@@ -192,7 +192,7 @@ class CLIBridgeService:
 
 ### **Frontend Architecture**
 1. **Component Organization**: Feature-based folder structure
-2. **State Management**: Apollo Cache + Zustand for UI state  
+2. **State Management**: Apollo Cache + Zustand for UI state
 3. **Styling**: Tailwind CSS for rapid, consistent UI development
 4. **Type Safety**: GraphQL codegen for TypeScript types
 5. **Testing**: Component testing with Testing Library
@@ -229,7 +229,7 @@ class CLIBridgeService:
 ## Current Status
 
 **Phase 3A Progress**: ✅ 100% Complete
-- GraphQL schema designed and documented  
+- GraphQL schema designed and documented
 - FastAPI backend architecture established
 - PostgreSQL + PostGIS models defined
 - CLI bridge service implemented
@@ -251,28 +251,119 @@ class CLIBridgeService:
 4. Test CLI data import pipeline
 5. Add error handling and loading states
 
-## Quick Development Commands
+## Development Environment Setup
+
+### **Hybrid Approach: Docker + Local Tooling**
+
+We use a **hybrid development strategy** that combines the best of both worlds:
+
+- **🐳 Docker-first**: Primary development environment (database, services, runtime)
+- **🔧 Local tooling**: Code quality tools (linting, formatting, type checking, pre-commit hooks)
+
+This approach ensures:
+✅ Consistent runtime environment across all developers
+✅ Fast, reliable linting and formatting in editors
+✅ Pre-commit hooks work without Docker overhead
+✅ TypeScript/ESLint work seamlessly in IDEs
+
+### **Quick Setup**
+
+**Option A: Local Tooling (Recommended)**
+```bash
+# 1. Setup local development tooling with nvm + Node 18 (one-time)
+./setup-local-dev.sh
+
+# 2. For new terminals, ensure Node 18 is active
+nvm use 18  # or add to your shell profile
+
+# 3. Start Docker development environment
+./dev-start.sh
+```
+
+**Option B: Docker-Only (Alternative)**
+```bash
+# 1. Use Docker-based pre-commit hooks (if local setup problematic)
+ln -sf .pre-commit-config-docker.yaml .pre-commit-config.yaml
+source backend/venv/bin/activate && pre-commit install
+
+# 2. Start Docker development environment
+./dev-start.sh
+
+# 3. Run manual linting via Docker
+./scripts/precommit-docker.sh
+```
+
+**Access Applications:**
+- Frontend: http://localhost:3000
+- GraphQL Playground: http://localhost:8000/graphql
+- API Docs: http://localhost:8000/docs
+
+### **Manual Development Commands**
 
 ```bash
-# Start development environment
-docker-compose up -d
+# Docker development (recommended)
+./dev-start.sh                 # Start full environment
+./cleanup.sh                   # Stop and cleanup
 
-# Backend development
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-
-# Frontend development  
+# Local linting/formatting
 cd frontend
-npm install
-npm run dev
+npx eslint . --ext ts,tsx      # Lint TypeScript
+npx prettier --write .         # Format code
+npx tsc --noEmit               # Type check
+
+cd backend
+source venv/bin/activate
+black .                        # Format Python
+isort .                        # Sort imports
+flake8 .                       # Lint Python
 
 # Database migrations
 cd backend
-alembic upgrade head
+alembic upgrade head           # Apply migrations
+alembic revision --autogenerate -m "description"  # Create migration
 
-# GraphQL playground
-http://localhost:8000/graphql
+# Manual service startup (alternative to Docker)
+cd backend && source venv/bin/activate && uvicorn app.main:app --reload
+cd frontend && npm run dev
+```
+
+### **Code Quality Tools**
+
+Pre-commit hooks automatically run:
+- **Python**: Black formatting, isort imports, flake8 linting
+- **Frontend**: ESLint, Prettier, TypeScript checking
+- **Security**: detect-secrets scanning
+- **General**: trailing whitespace, YAML/JSON validation
+
+**Local Setup Commands:**
+```bash
+# Manual pre-commit run (local)
+pre-commit run --all-files
+
+# Manual linting (local with Node 18)
+nvm use 18
+cd frontend && npx eslint . --ext ts,tsx
+cd frontend && npx prettier --check .
+cd frontend && npx tsc --noEmit
+```
+
+**Docker Setup Commands:**
+```bash
+# Manual pre-commit run (Docker)
+./scripts/precommit-docker.sh
+
+# Switch between local and Docker pre-commit
+ln -sf .pre-commit-config.yaml .pre-commit-config.yaml      # Local
+ln -sf .pre-commit-config-docker.yaml .pre-commit-config.yaml  # Docker
+```
+
+**Emergency Commands:**
+```bash
+# Skip hooks for urgent commits (use sparingly)
+git commit --no-verify
+
+# Reset to working pre-commit setup
+rm .pre-commit-config.yaml && ln -sf .pre-commit-config.yaml .pre-commit-config.yaml
 ```
 
 This context helps AI assistants understand the sophisticated architecture, current development status, and implementation priorities for the GymIntel Web Application.

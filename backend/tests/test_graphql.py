@@ -19,12 +19,9 @@ async def test_graphql_schema_introspection(async_client: AsyncClient):
       }
     }
     """
-    
-    response = await async_client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = await async_client.post("/graphql", json={"query": query})
+
     assert response.status_code == 200
     data = response.json()
     assert "data" in data
@@ -44,12 +41,9 @@ async def test_list_metropolitan_areas_query(async_client: AsyncClient):
       }
     }
     """
-    
-    response = await async_client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = await async_client.post("/graphql", json={"query": query})
+
     assert response.status_code == 200
     data = response.json()
     assert "data" in data
@@ -68,12 +62,9 @@ async def test_invalid_graphql_query(async_client: AsyncClient):
       }
     }
     """
-    
-    response = await async_client.post(
-        "/graphql",
-        json={"query": query}
-    )
-    
+
+    response = await async_client.post("/graphql", json={"query": query})
+
     assert response.status_code == 200
     data = response.json()
     assert "errors" in data

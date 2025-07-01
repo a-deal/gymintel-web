@@ -6,20 +6,20 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_GYM_ANALYTICS, MARKET_GAP_ANALYSIS } from '../graphql/queries';
-import { 
-  ChartBarIcon, 
-  MapPinIcon, 
+import {
+  ChartBarIcon,
+  MapPinIcon,
   TrendingUpIcon,
   ExclamationTriangleIcon,
-  MagnifyingGlassIcon 
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -59,7 +59,7 @@ export const AnalyticsPage: React.FC = () => {
   const marketGaps = gapData?.marketGapAnalysis || [];
 
   // Parse JSON data for charts
-  const confidenceData = analytics?.confidenceDistribution 
+  const confidenceData = analytics?.confidenceDistribution
     ? Object.entries(JSON.parse(analytics.confidenceDistribution)).map(([range, count]) => ({
         range,
         count: count as number,

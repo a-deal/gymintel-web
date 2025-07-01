@@ -28,7 +28,7 @@
 - `backend/Dockerfile.dev` - Backend development container
 - `frontend/Dockerfile.dev` - Frontend development container
 
-### Production Files  
+### Production Files
 - `docker-compose.prod.yml` - Production orchestration
 - `backend/Dockerfile` - Backend production container
 - `frontend/Dockerfile` - Frontend production container
@@ -74,7 +74,7 @@ cd backend
 source venv/bin/activate
 uvicorn app.main:app --reload
 
-# Frontend  
+# Frontend
 cd frontend
 npm run dev
 ```
@@ -145,7 +145,7 @@ GOOGLE_PLACES_API_KEY=your-google-places-api-key
 MAPBOX_ACCESS_TOKEN=your-mapbox-token
 
 # Database (handled by Docker)
-DATABASE_URL=postgresql://gymintel:gymintel_dev@database:5432/gymintel
+DATABASE_URL=postgresql://gymintel:gymintel_dev@database:5432/gymintel  # pragma: allowlist secret
 ```
 
 ### Frontend Configuration
@@ -259,7 +259,7 @@ docker-compose up -d
 
 Your GymIntel web application is ready for development with:
 - ✅ JetBrains Mono typography
-- ✅ Tailwind UI components  
+- ✅ Tailwind UI components
 - ✅ GraphQL API with playground
 - ✅ Hot reload for both frontend and backend
 - ✅ PostgreSQL with PostGIS

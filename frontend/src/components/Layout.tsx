@@ -4,9 +4,9 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  MapIcon, 
-  ChartBarIcon, 
+import {
+  MapIcon,
+  ChartBarIcon,
   MagnifyingGlassIcon,
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
@@ -40,7 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <MapIcon className="h-8 w-8 text-blue-600" />
           <h1 className="ml-3 text-xl font-bold text-gray-900 font-heading">GymIntel</h1>
         </div>
-        
+
         <nav className="mt-6">
           <div className="px-3">
             {navigation.map((item) => {

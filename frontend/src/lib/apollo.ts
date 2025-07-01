@@ -25,7 +25,7 @@ const wsLink = new GraphQLWsLink(
 const authLink = setContext((_, { headers }) => {
   // Get the authentication token from local storage if it exists
   const token = localStorage.getItem('token');
-  
+
   return {
     headers: {
       ...headers,
