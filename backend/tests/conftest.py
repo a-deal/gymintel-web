@@ -8,7 +8,7 @@ import pytest
 import pytest_asyncio
 from app.database import get_db
 from app.main import app
-from app.models.base import Base
+from app.models.gym import Base
 from httpx import AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

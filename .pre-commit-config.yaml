@@ -64,6 +64,16 @@ repos:
         files: ^frontend/.*\.(ts|tsx)$
         pass_filenames: false
 
+      # Backend testing
+      - id: backend-pytest
+        name: Backend Tests
+        entry: |
+          bash -c 'cd backend && (python3 -m pytest tests/ -v --tb=short 2>&1 ||
+          (echo -e "\n❌ Backend tests failed!\n\nTo fix:\n1. cd backend\n2. python3 -m pip install -r requirements.txt\n3. python3 -m pytest tests/ -v\n\nEnsures local env matches CI." && exit 1))'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
       # Prevent node_modules from being committed
       - id: prevent-node-modules
         name: Prevent node_modules commit

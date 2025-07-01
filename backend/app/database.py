@@ -59,3 +59,10 @@ async def drop_tables():
     """Drop all database tables (for testing)"""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+
+# FastAPI dependency
+async def get_db():
+    """Dependency for FastAPI routes"""
+    async with get_db_session() as session:
+        yield session
