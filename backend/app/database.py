@@ -13,8 +13,7 @@ from .models.gym import Base
 
 # Database configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:password@localhost/gymintel_web"
+    "DATABASE_URL", "postgresql://postgres:password@localhost/gymintel_web"
 )
 
 # Convert to async URL if needed
@@ -28,15 +27,11 @@ engine = create_async_engine(
     ASYNC_DATABASE_URL,
     echo=False,  # Set to True for SQL debugging
     pool_pre_ping=True,
-    poolclass=StaticPool if "sqlite" in DATABASE_URL else None
+    poolclass=StaticPool if "sqlite" in DATABASE_URL else None,
 )
 
 # Create async session factory
-AsyncSessionLocal = sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @asynccontextmanager

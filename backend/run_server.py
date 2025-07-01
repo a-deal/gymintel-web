@@ -14,11 +14,5 @@ if __name__ == "__main__":
     print("   • API Docs: http://localhost:8001/docs")
     print("   • Health Check: http://localhost:8001/health")
     print()
-    
-    uvicorn.run(
-        app, 
-        host="127.0.0.1", 
-        port=8001,
-        log_level="info",
-        access_log=True
-    )
+
+    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info", access_log=True)

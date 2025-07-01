@@ -23,18 +23,16 @@ app.add_middleware(
 graphql_app = GraphQLRouter(schema, graphql_ide="graphiql")
 app.include_router(graphql_app, prefix="/graphql")
 
+
 @app.get("/")
 async def root():
     return {
         "message": "GymIntel GraphQL API",
         "version": "1.0.0",
         "status": "healthy",
-        "endpoints": {
-            "graphql": "/graphql",
-            "playground": "/graphql",
-            "docs": "/docs"
-        }
+        "endpoints": {"graphql": "/graphql", "playground": "/graphql", "docs": "/docs"},
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -44,12 +42,14 @@ async def health_check():
         "services": {
             "yelp_api": "configured",
             "google_places": "configured",
-            "postgresql": "connected"
-        }
+            "postgresql": "connected",
+        },
     }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     print("🏋️ GymIntel GraphQL API Server")
     print("=" * 50)
     print("🌐 GraphQL Playground: http://localhost:8003/graphql")
@@ -59,5 +59,5 @@ if __name__ == "__main__":
     print()
     print("💡 Try this query:")
     print("   query { listMetropolitanAreas { name code state } }")
-    
+
     uvicorn.run(app, host="0.0.0.0", port=8003, log_level="info")

@@ -17,7 +17,7 @@ app = FastAPI(
     description="Advanced gym discovery platform with intelligent confidence scoring",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # Configure CORS for frontend integration
@@ -25,7 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # React dev server
-        "http://localhost:5173",  # Vite dev server  
+        "http://localhost:5173",  # Vite dev server
         "https://gymintel.vercel.app",  # Production frontend
     ],
     allow_credentials=True,
@@ -35,8 +35,7 @@ app.add_middleware(
 
 # Create GraphQL router
 graphql_app = GraphQLRouter(
-    schema,
-    graphql_ide="graphiql"  # Enable GraphQL playground in development
+    schema, graphql_ide="graphiql"  # Enable GraphQL playground in development
 )
 
 # Include GraphQL router
@@ -50,11 +49,7 @@ async def root():
         "message": "GymIntel GraphQL API",
         "version": "1.0.0",
         "status": "healthy",
-        "endpoints": {
-            "graphql": "/graphql",
-            "playground": "/graphql",
-            "docs": "/docs"
-        }
+        "endpoints": {"graphql": "/graphql", "playground": "/graphql", "docs": "/docs"},
     }
 
 
@@ -67,8 +62,8 @@ async def health_check():
         "services": {
             "yelp_api": "configured",
             "google_places": "configured",
-            "postgresql": "connected"
-        }
+            "postgresql": "connected",
+        },
     }
 
 
@@ -77,5 +72,5 @@ if __name__ == "__main__":
         "app.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True  # Enable hot reload in development
+        reload=True,  # Enable hot reload in development
     )

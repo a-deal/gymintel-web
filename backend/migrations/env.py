@@ -8,7 +8,7 @@ import os
 import sys
 
 # Add the parent directory to sys.path to import our models
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from app.models.gym import Base
 
@@ -22,7 +22,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Set the SQLAlchemy URL from environment variable if available
-database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/gymintel_web")
+database_url = os.getenv(
+    "DATABASE_URL", "postgresql://postgres:password@localhost/gymintel_web"
+)
 config.set_main_option("sqlalchemy.url", database_url)
 
 # add your model's MetaData object here
@@ -75,7 +77,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, 
+            connection=connection,
             target_metadata=target_metadata,
             render_as_batch=True,  # Enable batch mode for better SQLite compatibility
         )

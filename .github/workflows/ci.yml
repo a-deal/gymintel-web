@@ -44,7 +44,7 @@ jobs:
       - name: Run frontend tests
         run: |
           cd frontend
-          npm run test:coverage
+          npm run test -- --coverage
 
       - name: Upload frontend coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -198,7 +198,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
