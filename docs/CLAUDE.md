@@ -238,31 +238,49 @@ class CLIBridgeService:
 - Database migrations configured
 - Apollo Client setup complete
 
-**Phase 3B Progress**: ✅ 60% Complete
-- React components with Tailwind CSS
-- Layout and navigation structure
-- HomePage and SearchPage implemented
+**Phase 3B Progress**: ✅ 80% Complete
+- React components with Tailwind CSS + Tailwind UI
+- Professional UI components (GymCard, SearchFilters, Layout)
+- Complete page structure (HomePage, SearchPage, AnalyticsPage, MetroPage)
 - GraphQL integration working
+- Docker development environment configured
+- JetBrains Mono typography implemented
+- Comprehensive development documentation
 
 **Next Priorities**:
-1. Complete remaining UI components (GymCard, SearchFilters, MapView)
-2. Integrate Mapbox GL JS for interactive maps
-3. Add AnalyticsPage and MetroPage
-4. Test CLI data import pipeline
-5. Add error handling and loading states
+1. **Start Development Environment** - Run `./dev-start.sh` to launch Docker containers
+2. **Integrate Mapbox GL JS** - Add interactive maps to SearchPage
+3. **Implement Real-time Features** - GraphQL subscriptions for live updates
+4. **Test CLI Data Pipeline** - Import gym data from gymintel-cli
+5. **Add API Keys** - Configure Yelp/Google Places/Mapbox tokens
+6. **Database Seeding** - Populate with initial metro area data
+7. **Error Handling** - Add comprehensive error boundaries and loading states
 
-## Quick Development Commands
+## Development Environment Setup
 
+### **One-Command Start (Recommended)**
 ```bash
-# Start development environment
-docker-compose up -d
+# Clean any previous processes
+./cleanup.sh
 
+# Start full Docker environment with hot reload
+./dev-start.sh
+
+# Access applications
+# Frontend: http://localhost:3000
+# GraphQL Playground: http://localhost:8000/graphql
+# API Docs: http://localhost:8000/docs
+```
+
+### **Manual Development (Alternative)**
+```bash
 # Backend development
 cd backend
+source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# Frontend development  
+# Frontend development (new terminal)
 cd frontend
 npm install
 npm run dev
@@ -270,9 +288,25 @@ npm run dev
 # Database migrations
 cd backend
 alembic upgrade head
-
-# GraphQL playground
-http://localhost:8000/graphql
 ```
+
+### **Environment Configuration**
+```bash
+# Create .env file with API keys (optional for basic development)
+cp .env.example .env
+
+# Required for maps (optional - fallback available)
+MAPBOX_ACCESS_TOKEN=your-mapbox-token
+
+# Required for CLI integration (optional for UI development)
+YELP_API_KEY=your-yelp-api-key
+GOOGLE_PLACES_API_KEY=your-google-places-api-key
+```
+
+### **Development URLs**
+- **Frontend App**: http://localhost:3000
+- **GraphQL Playground**: http://localhost:8000/graphql  
+- **API Documentation**: http://localhost:8000/docs
+- **Database Admin**: http://localhost:8080 (pgAdmin via Docker)
 
 This context helps AI assistants understand the sophisticated architecture, current development status, and implementation priorities for the GymIntel Web Application.

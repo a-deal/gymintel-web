@@ -2,6 +2,16 @@
 
 A comprehensive **web-based gym discovery platform** with interactive maps, data visualization, and persistent storage. Built with **GraphQL, FastAPI, React, and PostgreSQL**.
 
+## 🐳 Container-First Development Policy
+
+**GymIntel Web follows a container-first development approach.** All development should be done using Docker containers to ensure consistency across environments and keep the host system clean.
+
+### Why Container-First?
+- **Clean Host System**: No local Node.js, Python, or database installations required
+- **Consistent Environments**: Same versions across all developers and deployments
+- **Easy Onboarding**: New developers just need Docker
+- **Isolation**: Dependencies contained and easily removable
+
 > **🔗 Related Projects**: This is the web application version of [GymIntel CLI](https://github.com/a-deal/gymintel-cli), which provides the stable command-line interface.
 
 ## 🎯 Project Vision
@@ -127,33 +137,49 @@ type Subscription {
 
 ## 🔧 Development Setup
 
-### **Prerequisites**
-- Node.js 18+ and npm/yarn
-- Python 3.9+ and pip
-- PostgreSQL 14+ with PostGIS extension
-- Docker (optional, for local development)
+### **Prerequisites (Container-First)**
+- **Docker** and Docker Compose
+- **Git** for version control
+- **That's it!** No local Node.js, Python, or PostgreSQL required
 
-### **Quick Start**
+### **Quick Start (Container-Only)**
 ```bash
 # Clone the repository
 git clone https://github.com/a-deal/gymintel-web.git
 cd gymintel-web
 
-# Start with Docker (recommended)
-docker-compose up -d
+# Start the entire development environment with one command
+./dev-start.sh
 
-# Or setup manually:
+# That's it! Everything runs in containers:
+# ✅ Frontend: http://localhost:3000
+# ✅ Backend API: http://localhost:8000  
+# ✅ GraphQL Playground: http://localhost:8000/graphql
+# ✅ PostgreSQL: localhost:5432
+# ✅ Redis: localhost:6379
 
-# Backend setup
-cd backend
-pip install -r requirements.txt
-alembic upgrade head
-uvicorn app.main:app --reload
+# Run tests
+./scripts/test.sh
 
-# Frontend setup (new terminal)
-cd frontend
-npm install
-npm run dev
+# View logs
+docker compose logs -f
+
+# Stop everything
+docker compose down
+```
+
+### **Testing & Quality Assurance**
+```bash
+# Run all tests with coverage
+./scripts/test.sh
+
+# Individual test suites
+docker compose exec frontend npm run test:coverage
+docker compose exec backend pytest --cov=app
+
+# Code quality checks
+docker compose exec frontend npm run lint
+docker compose exec backend black . && isort . && flake8 .
 ```
 
 ### **Environment Variables**
@@ -216,19 +242,18 @@ GraphQL schema and API documentation will be available at:
 
 ## 🤝 Contributing
 
-This project follows the same contribution guidelines as the [GymIntel CLI](https://github.com/a-deal/gymintel-cli/blob/main/docs/CONTRIBUTING.md).
+See our [Contributing Guide](docs/CONTRIBUTING.md) for detailed development guidelines.
+
+### **Quick Links**
+- [Development Setup](docs/DEVELOPMENT.md) - Detailed setup instructions
+- [Testing Guide](docs/TESTING.md) - Comprehensive testing documentation
+- [Project Context](docs/CLAUDE.md) - AI assistant context and architecture details
 
 ### **Development Workflow**
 1. Create feature branch from `main`
-2. Develop using local Docker environment
-3. Test GraphQL queries in playground
-4. Submit PR with GraphQL schema changes documented
-
-### **Code Organization**
-- **Backend**: Follow FastAPI + SQLAlchemy patterns
-- **Frontend**: React functional components with TypeScript
-- **GraphQL**: Type-first schema development
-- **Testing**: Jest (frontend) + pytest (backend)
+2. Develop using Docker containers only
+3. Run tests with `./scripts/test.sh`
+4. Submit PR with all checks passing
 
 ## 📈 Performance Targets
 
