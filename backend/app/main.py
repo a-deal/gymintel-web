@@ -36,8 +36,7 @@ app.add_middleware(
 # Create GraphQL router
 graphql_app = GraphQLRouter(
     schema,
-    graphiql=True,  # Enable GraphQL playground in development
-    path="/graphql"
+    graphql_ide="graphiql"  # Enable GraphQL playground in development
 )
 
 # Include GraphQL router

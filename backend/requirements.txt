@@ -3,7 +3,7 @@
 # Core framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-strawberry-graphql[fastapi]==0.214.1
+strawberry-graphql[fastapi]==0.214.0
 
 # Database
 sqlalchemy==2.0.23

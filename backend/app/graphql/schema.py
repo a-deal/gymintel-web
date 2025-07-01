@@ -210,28 +210,32 @@ class Query:
         filters: Optional[SearchFilters] = None
     ) -> SearchResult:
         """Search for gyms in a specific area with intelligent filtering"""
-        # Implementation will be in resolver
-        pass
+        from .resolvers import GymResolvers
+        return await GymResolvers.search_gyms(zipcode, radius, limit, filters)
     
     @strawberry.field
     async def gym_by_id(self, gym_id: strawberry.ID) -> Optional[Gym]:
         """Get a specific gym by ID"""
-        pass
+        from .resolvers import GymResolvers
+        return await GymResolvers.gym_by_id(str(gym_id))
     
     @strawberry.field
     async def metropolitan_area(self, code: str) -> Optional[MetropolitanArea]:
         """Get metropolitan area data by code (nyc, la, etc.)"""
-        pass
+        from .resolvers import MetroResolvers
+        return await MetroResolvers.metropolitan_area(code)
     
     @strawberry.field
     async def list_metropolitan_areas(self) -> List[MetropolitanArea]:
         """List all available metropolitan areas"""
-        pass
+        from .resolvers import MetroResolvers
+        return await MetroResolvers.list_metropolitan_areas()
     
     @strawberry.field
     async def gym_analytics(self, zipcode: str) -> GymAnalytics:
         """Get comprehensive analytics for a ZIP code area"""
-        pass
+        from .resolvers import GymResolvers
+        return await GymResolvers.gym_analytics(zipcode)
     
     @strawberry.field
     async def market_gap_analysis(
@@ -240,7 +244,8 @@ class Query:
         radius: float = 10.0
     ) -> List[MarketGap]:
         """Identify potential market opportunities"""
-        pass
+        from .resolvers import GymResolvers
+        return await GymResolvers.market_gap_analysis(zipcode, radius)
     
     @strawberry.field
     async def gyms_by_metro(
@@ -250,7 +255,8 @@ class Query:
         offset: int = 0
     ) -> List[Gym]:
         """Get gyms within a metropolitan area with pagination"""
-        pass
+        from .resolvers import GymResolvers
+        return await GymResolvers.gyms_by_metro(metro_code, limit, offset)
 
 
 # Mutation Root  
@@ -265,7 +271,8 @@ class Mutation:
         data: List[GymDataInput]
     ) -> ImportResult:
         """Import gym data from CLI search results"""
-        pass
+        from .resolvers import MutationResolvers
+        return await MutationResolvers.import_gym_data(zipcode, data)
     
     @strawberry.field
     async def save_search(
@@ -276,7 +283,17 @@ class Mutation:
         name: Optional[str] = None
     ) -> SavedSearch:
         """Save a user's search preferences"""
-        pass
+        # TODO: Implement user search saving
+        import uuid
+        return SavedSearch(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            zipcode=zipcode,
+            radius=radius,
+            name=name,
+            created_at=datetime.utcnow(),
+            last_run=None
+        )
     
     @strawberry.field
     async def trigger_cli_import(
@@ -285,7 +302,9 @@ class Mutation:
         radius: float = 10.0
     ) -> str:
         """Trigger a CLI search and import results (returns search_id)"""
-        pass
+        # TODO: Implement async CLI search triggering
+        import uuid
+        return str(uuid.uuid4())
 
 
 # Subscription Root
@@ -294,16 +313,26 @@ class Subscription:
     """GraphQL subscription operations for real-time updates"""
     
     @strawberry.subscription
-    async def gym_updates(self, zipcode: str):
+    async def gym_updates(self, zipcode: str) -> Gym:
         """Subscribe to gym data updates for a specific area"""
         # Real-time gym data changes
-        yield  # Implementation with async generator
+        # Placeholder implementation - would connect to real-time data source
+        import asyncio
+        await asyncio.sleep(1)
+        # This is a placeholder that would never actually yield
+        # In a real implementation, this would connect to a message queue or database changes
+        return  # This will never execute, but satisfies the type checker
+        yield  # Unreachable code, but keeps the async generator signature
     
     @strawberry.subscription  
-    async def search_progress(self, search_id: str):
+    async def search_progress(self, search_id: str) -> SearchProgress:
         """Subscribe to search progress updates"""
         # Real-time progress for long-running searches
-        yield  # Implementation with async generator
+        # Placeholder implementation
+        import asyncio
+        await asyncio.sleep(1)
+        return  # This will never execute, but satisfies the type checker
+        yield  # Unreachable code, but keeps the async generator signature
 
 
 # Schema definition

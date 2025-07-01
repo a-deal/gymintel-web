@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for better integration with Tailwind UI */
+@layer base {
+  html {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-variation-settings: normal;
+  }
+  
+  /* Apply JetBrains Mono to headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+  
+  /* Body text uses monospace */
+  body {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Custom slider styles for search filters */
+  .slider {
+    @apply bg-gray-200 rounded-lg appearance-none cursor-pointer;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 bg-gym-blue-600 rounded-full cursor-pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    @apply w-5 h-5 bg-gym-blue-600 rounded-full cursor-pointer border-0;
+  }
+
+  /* Map controls styling */
+  .mapboxgl-ctrl-group button {
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50;
+  }
+  
+  .mapboxgl-popup-content {
+    @apply bg-white rounded-lg shadow-lg border border-gray-200 p-0;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Global overrides for better Tailwind UI integration */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  @apply font-sans antialiased bg-gray-50 text-gray-900;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  @apply outline-none ring-2 ring-gym-blue-500 ring-offset-2;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+input,
+select,
+textarea,
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

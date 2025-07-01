@@ -25,7 +25,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: gymintel-backend
     environment:
       - DATABASE_URL=postgresql://gymintel:gymintel_dev@database:5432/gymintel
@@ -51,7 +51,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: gymintel-frontend
     environment:
       - VITE_GRAPHQL_ENDPOINT=http://localhost:8000/graphql
