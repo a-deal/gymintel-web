@@ -33,7 +33,7 @@ describe('GymCard', () => {
     expect(screen.getByText('123 Main St, Test City, TC 12345')).toBeInTheDocument()
     expect(screen.getByText('(555) 123-4567')).toBeInTheDocument()
     expect(screen.getByText('4.5')).toBeInTheDocument()
-    expect(screen.getByText('150 reviews')).toBeInTheDocument()
+    expect(screen.getByText('(150 reviews)')).toBeInTheDocument()
   })
 
   it('displays confidence score', () => {
@@ -63,6 +63,7 @@ describe('GymCard', () => {
 
     render(<GymCard gym={minimalGym} />)
     expect(screen.getByText('Minimal Gym')).toBeInTheDocument()
-    expect(screen.getByText(/75%/)).toBeInTheDocument()
+    // Check for confidence in the badge by looking for "High (75%)"
+    expect(screen.getByText(/High.*75%/)).toBeInTheDocument()
   })
 })

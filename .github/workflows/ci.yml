@@ -60,7 +60,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgis/postgis:15-3.3
         env:
           POSTGRES_PASSWORD: testpass  # pragma: allowlist secret
           POSTGRES_USER: testuser
@@ -153,6 +153,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create .env file
+        env:
+          TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD || 'testpass' }}
+          TEST_YELP_KEY: ${{ secrets.TEST_YELP_KEY || 'test-key' }}
+          TEST_GOOGLE_KEY: ${{ secrets.TEST_GOOGLE_KEY || 'test-key' }}
+          TEST_MAPBOX_TOKEN: ${{ secrets.TEST_MAPBOX_TOKEN || 'test-token' }}
         run: |
           cat > .env << EOF
           # Test environment variables
@@ -160,10 +165,10 @@ jobs:
           DATABASE_PORT=5432
           DATABASE_NAME=gymintel
           DATABASE_USER=postgres
-          DATABASE_PASSWORD=testpass
-          YELP_API_KEY=test-key
-          GOOGLE_PLACES_API_KEY=test-key
-          MAPBOX_ACCESS_TOKEN=test-token
+          DATABASE_PASSWORD=${TEST_DB_PASSWORD}
+          YELP_API_KEY=${TEST_YELP_KEY}
+          GOOGLE_PLACES_API_KEY=${TEST_GOOGLE_KEY}
+          MAPBOX_ACCESS_TOKEN=${TEST_MAPBOX_TOKEN}
           ENVIRONMENT=testing
           EOF
 
