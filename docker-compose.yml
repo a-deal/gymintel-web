@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL with PostGIS extension
   database:
-    image: postgis/postgis:15-3.3
+    image: postgres:15-alpine
     container_name: gymintel-db
     environment:
       POSTGRES_USER: gymintel

@@ -1,0 +1,40 @@
+# Minimal testing configuration
+version: '3.8'
+
+services:
+  # Backend without database dependency for quick testing
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: gymintel-backend-test
+    environment:
+      - DATABASE_URL=sqlite:///./test.db
+      - ENVIRONMENT=development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend only
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: gymintel-frontend-test
+    environment:
+      - VITE_GRAPHQL_ENDPOINT=http://localhost:8000/graphql
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+
+  # Redis (small, quick to start)
+  redis:
+    image: redis:7-alpine
+    container_name: gymintel-redis-test
+    ports:
+      - "6379:6379"

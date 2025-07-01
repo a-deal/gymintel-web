@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Test Database (separate from development)
+  test-database:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: test_gymintel
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-EXEC", "pg_isready -U test_user -d test_gymintel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Tests
+  backend-tests:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      test-database:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://test_user:test_pass@test-database:5432/test_gymintel
+      TESTING: "true"
+    command: >
+      sh -c "
+        echo 'Running backend tests...' &&
+        pytest --cov=app --cov-report=term-missing --cov-report=html:htmlcov
+      "
+    volumes:
+      - ./backend:/app
+      - backend_test_coverage:/app/htmlcov
+
+  # Frontend Tests
+  frontend-tests:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.test
+    command: >
+      sh -c "
+        echo 'Running frontend tests...' &&
+        npm run test:coverage
+      "
+    volumes:
+      - ./frontend:/app
+      - frontend_test_coverage:/app/coverage
+
+volumes:
+  backend_test_coverage:
+  frontend_test_coverage:
