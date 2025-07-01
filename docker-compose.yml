@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with PostGIS extension
+  database:
+    image: postgis/postgis:15-3.3
+    container_name: gymintel-db
+    environment:
+      POSTGRES_USER: gymintel
+      POSTGRES_PASSWORD: gymintel_dev
+      POSTGRES_DB: gymintel
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gymintel -d gymintel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI backend with GraphQL
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gymintel-backend
+    environment:
+      - DATABASE_URL=postgresql://gymintel:gymintel_dev@database:5432/gymintel
+      - YELP_API_KEY=${YELP_API_KEY}
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - ENVIRONMENT=development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ../gymintel-cli/src:/app/cli_services  # Mount CLI services
+    depends_on:
+      database:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gymintel-frontend
+    environment:
+      - VITE_GRAPHQL_ENDPOINT=http://localhost:8000/graphql
+      - VITE_MAPBOX_ACCESS_TOKEN=${MAPBOX_ACCESS_TOKEN}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+
+  # Redis for caching and real-time features
+  redis:
+    image: redis:7-alpine
+    container_name: gymintel-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: gymintel-network
