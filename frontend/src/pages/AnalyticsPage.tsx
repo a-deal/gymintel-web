@@ -4,12 +4,13 @@
  */
 
 import { useState } from 'react';
+import { MarketGap } from '../types/gym';
 import { useQuery } from '@apollo/client';
 import { GET_GYM_ANALYTICS, MARKET_GAP_ANALYSIS } from '../graphql/queries';
 import {
   ChartBarIcon,
   MapPinIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ExclamationTriangleIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
@@ -24,11 +25,9 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line
 } from 'recharts';
 
-export const AnalyticsPage: React.FC = () => {
+export const AnalyticsPage = () => {
   const [zipcode, setZipcode] = useState('');
   const [activeZipcode, setActiveZipcode] = useState('');
 
@@ -40,7 +39,7 @@ export const AnalyticsPage: React.FC = () => {
     }
   );
 
-  const { data: gapData, loading: gapLoading } = useQuery(
+  const { data: gapData } = useQuery(
     MARKET_GAP_ANALYSIS,
     {
       variables: { zipcode: activeZipcode, radius: 10 },
@@ -181,7 +180,7 @@ export const AnalyticsPage: React.FC = () => {
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <TrendingUpIcon className="h-6 w-6 text-gray-400" />
+                      <ArrowTrendingUpIcon className="h-6 w-6 text-gray-400" />
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
@@ -276,7 +275,7 @@ export const AnalyticsPage: React.FC = () => {
                         fill="#8884d8"
                         dataKey="count"
                       >
-                        {sourceData.map((entry, index) => (
+                        {sourceData.map((_, index: number) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -329,7 +328,7 @@ export const AnalyticsPage: React.FC = () => {
                   Market Opportunity Analysis
                 </h3>
                 <div className="space-y-4">
-                  {marketGaps.map((gap, index) => (
+                  {marketGaps.map((gap: MarketGap, index: number) => (
                     <div key={index} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

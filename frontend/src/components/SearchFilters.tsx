@@ -18,11 +18,11 @@ interface SearchFiltersProps {
   onFiltersChange: (filters: SearchFiltersType) => void;
 }
 
-export const SearchFilters: React.FC<SearchFiltersProps> = ({
+export const SearchFilters = ({
   filters,
   onFiltersChange
-}) => {
-  const updateFilter = (key: keyof SearchFiltersType, value: any) => {
+}: SearchFiltersProps) => {
+  const updateFilter = (key: keyof SearchFiltersType, value: unknown) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 

@@ -2,18 +2,18 @@
  * Home Page - Landing page with quick search and overview
  */
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLazyQuery } from '@apollo/client';
 import { SEARCH_GYMS } from '../graphql/queries';
 import { MagnifyingGlassIcon, MapPinIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
-export const HomePage: React.FC = () => {
+export const HomePage = () => {
   const [zipcode, setZipcode] = useState('');
   const navigate = useNavigate();
-  const [searchGyms, { loading }] = useLazyQuery(SEARCH_GYMS);
+  const [, { loading }] = useLazyQuery(SEARCH_GYMS);
 
-  const handleQuickSearch = async (e: React.FormEvent) => {
+  const handleQuickSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!zipcode.trim()) return;
 

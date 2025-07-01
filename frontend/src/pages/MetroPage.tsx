@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { MetropolitanArea, Gym } from '../types/gym';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { LIST_METROPOLITAN_AREAS, GET_METROPOLITAN_AREA, GET_GYMS_BY_METRO } from '../graphql/queries';
@@ -17,7 +18,7 @@ import {
 import { GymCard } from '../components/GymCard';
 import clsx from 'clsx';
 
-export const MetroPage: React.FC = () => {
+export const MetroPage = () => {
   const { code } = useParams<{ code: string }>();
   const [selectedMetro, setSelectedMetro] = useState<string>(code || '');
   const [showGyms, setShowGyms] = useState(false);
@@ -88,7 +89,7 @@ export const MetroPage: React.FC = () => {
           </div>
         ) : (
           <div className="p-4 space-y-2">
-            {metroAreas.map((metro) => (
+            {metroAreas.map((metro: MetropolitanArea) => (
               <button
                 key={metro.id}
                 onClick={() => {
@@ -227,7 +228,7 @@ export const MetroPage: React.FC = () => {
                   Market Characteristics
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {currentMetro.marketCharacteristics.map((characteristic, index) => (
+                  {currentMetro.marketCharacteristics.map((characteristic: string, index: number) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700"
@@ -245,7 +246,7 @@ export const MetroPage: React.FC = () => {
                 ZIP Codes ({currentMetro.zipCodes.length})
               </h3>
               <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
-                {currentMetro.zipCodes.map((zip, index) => (
+                {currentMetro.zipCodes.map((zip: string, index: number) => (
                   <span
                     key={index}
                     className="text-center py-2 px-3 text-sm font-mono bg-gray-50 rounded border border-gray-200"
@@ -317,7 +318,7 @@ export const MetroPage: React.FC = () => {
                 </h3>
                 {gyms.length > 0 ? (
                   <div className="space-y-4">
-                    {gyms.map((gym) => (
+                    {gyms.map((gym: Gym) => (
                       <GymCard key={gym.id} gym={gym} />
                     ))}
                   </div>

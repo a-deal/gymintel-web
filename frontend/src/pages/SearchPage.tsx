@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { Gym } from '../types/gym';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { SEARCH_GYMS } from '../graphql/queries';
@@ -17,7 +18,7 @@ import {
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 
-export const SearchPage: React.FC = () => {
+export const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [zipcode, setZipcode] = useState(searchParams.get('zipcode') || '');
   const [radius, setRadius] = useState(Number(searchParams.get('radius')) || 10);
@@ -176,7 +177,7 @@ export const SearchPage: React.FC = () => {
 
           {viewMode === 'list' && gyms.length > 0 && (
             <div className="p-6 space-y-4 overflow-y-auto h-full">
-              {gyms.map((gym) => (
+              {gyms.map((gym: Gym) => (
                 <GymCard key={gym.id} gym={gym} />
               ))}
             </div>

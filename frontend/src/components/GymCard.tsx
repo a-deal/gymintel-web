@@ -20,7 +20,7 @@ interface GymCardProps {
   onClick?: () => void;
 }
 
-export const GymCard: React.FC<GymCardProps> = ({ gym, onClick }) => {
+export const GymCard = ({ gym, onClick }: GymCardProps) => {
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'text-confidence-excellent bg-green-50 border-green-200';
     if (confidence >= 0.6) return 'text-confidence-high bg-green-50 border-green-200';

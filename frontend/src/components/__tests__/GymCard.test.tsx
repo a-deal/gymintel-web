@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import GymCard from '../GymCard'
+import { GymCard } from '../GymCard'
 
 const mockGym = {
   id: '1',
@@ -11,11 +11,18 @@ const mockGym = {
   rating: 4.5,
   reviewCount: 150,
   confidence: 0.85,
-  sources: ['Yelp', 'Google'],
+  matchConfidence: 0.85,
+  sources: [
+    { name: 'Yelp', confidence: 0.9, lastUpdated: '2023-01-01' },
+    { name: 'Google', confidence: 0.8, lastUpdated: '2023-01-01' }
+  ],
+  reviews: [],
   coordinates: {
     latitude: 40.7128,
     longitude: -74.0060
-  }
+  },
+  createdAt: '2023-01-01',
+  updatedAt: '2023-01-01'
 }
 
 describe('GymCard', () => {
@@ -31,7 +38,7 @@ describe('GymCard', () => {
 
   it('displays confidence score', () => {
     render(<GymCard gym={mockGym} />)
-    expect(screen.getByText('85%')).toBeInTheDocument()
+    expect(screen.getByText(/85%/)).toBeInTheDocument()
   })
 
   it('shows data sources', () => {
@@ -46,12 +53,16 @@ describe('GymCard', () => {
       name: 'Minimal Gym',
       address: '456 Oak St',
       confidence: 0.75,
-      sources: ['Yelp'],
-      coordinates: { latitude: 40.7128, longitude: -74.0060 }
+      matchConfidence: 0.75,
+      sources: [{ name: 'Yelp', confidence: 0.75, lastUpdated: '2023-01-01' }],
+      reviews: [],
+      coordinates: { latitude: 40.7128, longitude: -74.0060 },
+      createdAt: '2023-01-01',
+      updatedAt: '2023-01-01'
     }
 
     render(<GymCard gym={minimalGym} />)
     expect(screen.getByText('Minimal Gym')).toBeInTheDocument()
-    expect(screen.getByText('75%')).toBeInTheDocument()
+    expect(screen.getByText(/75%/)).toBeInTheDocument()
   })
 })

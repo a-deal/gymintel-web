@@ -4,7 +4,7 @@
  */
 
 import { useRef, useEffect, useState } from 'react';
-import Map, { Marker, NavigationControl, ScaleControl, GeolocateControl } from 'react-map-gl';
+import Map, { Marker, NavigationControl, ScaleControl, GeolocateControl, MapRef } from 'react-map-gl';
 import { Gym, Coordinates } from '../types/gym';
 import {
   MapPinIcon,
@@ -23,13 +23,13 @@ interface MapViewProps {
   onGymClick?: (gym: Gym) => void;
 }
 
-export const MapView: React.FC<MapViewProps> = ({
+export const MapView = ({
   gyms,
   center,
   radius,
   onGymClick
-}) => {
-  const mapRef = useRef<any>(null);
+}: MapViewProps) => {
+  const mapRef = useRef<MapRef>(null);
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
   const [viewState, setViewState] = useState({
     longitude: center?.longitude || -122.4194,
