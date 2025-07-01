@@ -60,7 +60,8 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 .yarn-integrity
-package-lock.json
+# package-lock.json excluded to avoid local dev conflicts
+# CI will generate it automatically
 
 # Frontend build artifacts
 /frontend/dist/
