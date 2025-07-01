@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -14,7 +14,7 @@ jobs:
     name: Deploy Frontend to Vercel
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
     name: Deploy Backend to Railway
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-frontend, deploy-backend]
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,12 +76,12 @@ jobs:
         run: |
           # Test backend health
           curl -f ${{ secrets.PRODUCTION_API_URL }}/health
-          
+
           # Test GraphQL endpoint
           curl -X POST ${{ secrets.PRODUCTION_API_URL }}/graphql \
             -H "Content-Type: application/json" \
             -d '{"query": "query { __typename }"}'
-          
+
           # Test frontend
           curl -f ${{ secrets.PRODUCTION_FRONTEND_URL }}
 
