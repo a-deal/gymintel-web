@@ -370,3 +370,62 @@ rm .pre-commit-config.yaml && ln -sf .pre-commit-config.yaml .pre-commit-config.
 ```
 
 This context helps AI assistants understand the sophisticated architecture, current development status, and implementation priorities for the GymIntel Web Application.
+
+## Current Deployment Status (July 2, 2025)
+
+### Completed Work:
+- ✅ **CI/CD Pipeline Fixed**:
+  - Backend tests now use PostGIS image (fixes geometry type errors)
+  - Frontend tests fixed (Router nesting, GymCard component tests)
+  - Docker-based test scripts for both backend and frontend
+
+- ✅ **Project Organization**:
+  - Docker files moved to `docker/`
+  - Documentation moved to `docs/`
+  - Shell scripts moved to `scripts/`
+  - All file references updated
+
+- ✅ **Vercel Configuration**:
+  - Created `frontend/vercel.json` with Vite settings
+  - Created `frontend/.vercelignore`
+  - Updated deploy workflow
+  - Created comprehensive setup documentation
+
+### Current Blockers:
+- ⏳ **Vercel Deployment** - Missing GitHub secrets:
+  - `VERCEL_TOKEN`
+  - `VERCEL_ORG_ID`
+  - `VERCEL_PROJECT_ID`
+
+### Next Steps to Resume:
+
+1. **Complete Vercel Setup**:
+   ```bash
+   cd frontend
+   npx vercel login         # Choose GitHub auth
+   npx vercel whoami        # Copy the ID shown
+   npx vercel              # Create/link project
+   cat .vercel/project.json # Get projectId
+   ```
+
+2. **Create Vercel Token**:
+   - Go to https://vercel.com/account/tokens
+   - Create token named `gymintel-github-actions`
+
+3. **Add GitHub Secrets**:
+   - Go to repo Settings → Secrets → Actions
+   - Add VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+
+4. **Set Vercel Environment Variables**:
+   - In Vercel Dashboard → Project Settings → Environment Variables
+   - Add VITE_GRAPHQL_ENDPOINT and VITE_MAPBOX_ACCESS_TOKEN
+
+### Files Created/Updated Today:
+- `docs/DEPLOYMENT_SECRETS.md` - Lists all required secrets
+- `docs/VERCEL_SETUP.md` - Detailed Vercel setup guide
+- `frontend/nginx.conf` - For production Docker builds
+- `frontend/vercel.json` - Vercel configuration
+- `frontend/.vercelignore` - Files to exclude from deployment
+- `frontend/scripts/test-docker.sh` - Docker-based frontend testing
+
+All code is ready for deployment - just need the Vercel credentials!
