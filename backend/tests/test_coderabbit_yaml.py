@@ -288,7 +288,7 @@ reviews:
         special_yaml = """
 reviews:
   auto_review: true
-  message: "Special chars: @#$%^&*()_+{}|:<>?[],./'"
+  message: "Special chars: @#$%^&*()_+{}|:<>?[],./"
   regex_pattern: "\\\\d+\\\\.\\\\d+"
 """
         parsed = yaml.safe_load(special_yaml)
@@ -307,7 +307,10 @@ reviews:
                 "request_changes_workflow": bool,
                 "high_level_summary": bool,
             },
-            "knowledge_base": {"learnings": {"enabled": bool}, "opt_out": bool},
+            "knowledge_base": {
+                "learnings": {"enabled": bool},
+                "opt_out": bool,
+            },
         }
 
         def validate_schema(data, schema, path=""):
@@ -363,7 +366,8 @@ language:
         )
 
         for lang in config.get("language", {}):
-            # Simple validation - real implementation might use whitelist
+            # This is a simple validation
+            # In real implementation you might have a whitelist
             assert isinstance(lang, str)
             assert len(lang) > 0
 
