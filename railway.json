@@ -1,9 +1,7 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "DOCKERFILE",
-    "dockerfilePath": "backend/Dockerfile.railway",
-    "buildCommand": "echo 'Using Dockerfile.railway for build'"
+    "builder": "NIXPACKS"
   },
   "deploy": {
     "startCommand": "cd backend && python start.py",

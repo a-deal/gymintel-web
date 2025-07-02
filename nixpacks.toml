@@ -1,8 +1,16 @@
 [phases.setup]
-nixPkgs = ["python311", "postgresql", "gcc"]
+nixPkgs = ["python311", "postgresql", "gcc", "pkgconfig"]
+aptPkgs = ["libpq-dev", "python3-dev", "build-essential"]
 
 [phases.install]
-cmds = ["cd backend && pip install -r requirements.txt"]
+cmds = [
+    "cd backend",
+    "pip install --upgrade pip setuptools wheel",
+    "pip install -r requirements.txt"
+]
 
 [start]
 cmd = "cd backend && python start.py"
+
+[variables]
+PYTHONUNBUFFERED = "1"
