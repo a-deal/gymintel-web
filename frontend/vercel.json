@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "gymintel-web",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
@@ -42,9 +41,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_GRAPHQL_ENDPOINT": "@production_graphql_endpoint",
-    "VITE_MAPBOX_ACCESS_TOKEN": "@mapbox_access_token"
-  }
+  ]
 }
