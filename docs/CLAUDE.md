@@ -35,7 +35,10 @@ gymintel-web/
 │   │   └── App.tsx            # Main application
 │   └── package.json           # Node.js dependencies
 ├── shared/                    # Shared types & utilities
-└── docker-compose.yml         # Local development environment
+├── docker/                    # Docker configuration files
+│   └── docker-compose.yml     # Local development environment
+├── scripts/                   # Development and utility scripts
+└── docs/                      # Documentation files
 ```
 
 ## Key Features & Design
@@ -277,7 +280,7 @@ This approach ensures:
 nvm use 18  # or add to your shell profile
 
 # 3. Start Docker development environment
-./dev-start.sh
+./scripts/dev-start.sh
 ```
 
 **Option B: Docker-Only (Alternative)**
@@ -287,7 +290,7 @@ ln -sf .pre-commit-config-docker.yaml .pre-commit-config.yaml
 source backend/venv/bin/activate && pre-commit install
 
 # 2. Start Docker development environment
-./dev-start.sh
+./scripts/dev-start.sh
 
 # 3. Run manual linting via Docker
 ./scripts/precommit-docker.sh
@@ -302,8 +305,8 @@ source backend/venv/bin/activate && pre-commit install
 
 ```bash
 # Docker development (recommended)
-./dev-start.sh                 # Start full environment
-./cleanup.sh                   # Stop and cleanup
+./scripts/dev-start.sh                 # Start full environment
+./scripts/cleanup.sh                   # Stop and cleanup
 
 # Local linting/formatting
 cd frontend

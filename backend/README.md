@@ -94,5 +94,5 @@ uvicorn app.main:app --reload
 docker build -t gymintel-backend .
 
 # Run with docker-compose (recommended)
-cd .. && docker-compose up backend
+cd .. && docker-compose -f docker/docker-compose.yml up backend
 ```

@@ -124,11 +124,15 @@ gymintel-web/
 │   ├── Dockerfile             # Production container
 │   ├── Dockerfile.dev         # Development container
 │   └── package.json           # Node dependencies
-├── docker-compose.yml         # Development orchestration
-├── docker-compose.prod.yml    # Production orchestration
-├── dev-start.sh              # Start development
-├── cleanup.sh                # Clean up processes
-└── DEVELOPMENT.md            # This guide
+├── docker/
+│   ├── docker-compose.yml     # Development orchestration
+│   └── docker-compose.prod.yml # Production orchestration
+├── scripts/
+│   ├── dev-start.sh          # Start development
+│   └── cleanup.sh            # Clean up processes
+├── docs/
+│   └── DEVELOPMENT.md        # This guide
+└── README.md                 # Project overview
 ```
 
 ## 🔧 Configuration

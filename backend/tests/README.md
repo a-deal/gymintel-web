@@ -55,7 +55,7 @@ docker exec test-postgres psql -U postgres -d test_gymintel -c "CREATE EXTENSION
 
 ```bash
 # From project root, run test services
-docker-compose -f docker-compose.test.yml up -d
+docker-compose -f docker/docker-compose.test.yml up -d
 ```
 
 ### Running Tests

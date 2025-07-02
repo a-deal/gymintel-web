@@ -11,9 +11,9 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
-# Check if docker-compose is available
-if ! command -v docker-compose &> /dev/null; then
-    echo "❌ docker-compose could not be found. Please install Docker Compose."
+# Check if docker-compose -f ../docker/docker-compose.yml is available
+if ! command -v docker-compose -f ../docker/docker-compose.yml &> /dev/null; then
+    echo "❌ docker-compose -f ../docker/docker-compose.yml could not be found. Please install Docker Compose."
     exit 1
 fi
 
@@ -22,11 +22,11 @@ echo
 
 # Stop any existing containers
 echo "🛑 Stopping existing containers..."
-docker-compose down
+docker-compose -f ../docker/docker-compose.yml down
 
 # Build and start services
 echo "🚀 Building and starting services..."
-docker-compose up --build -d
+docker-compose -f ../docker/docker-compose.yml up --build -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be ready..."
@@ -37,21 +37,21 @@ echo "📊 Service Status:"
 echo "=================="
 
 # Check PostgreSQL
-if docker-compose ps postgres | grep -q "Up"; then
+if docker-compose -f ../docker/docker-compose.yml ps postgres | grep -q "Up"; then
     echo "✅ PostgreSQL: Running"
 else
     echo "❌ PostgreSQL: Not running"
 fi
 
 # Check Backend
-if docker-compose ps backend | grep -q "Up"; then
+if docker-compose -f ../docker/docker-compose.yml ps backend | grep -q "Up"; then
     echo "✅ Backend: Running"
 else
     echo "❌ Backend: Not running"
 fi
 
 # Check Frontend
-if docker-compose ps frontend | grep -q "Up"; then
+if docker-compose -f ../docker/docker-compose.yml ps frontend | grep -q "Up"; then
     echo "✅ Frontend: Running"
 else
     echo "❌ Frontend: Not running"
@@ -69,10 +69,10 @@ echo "  • API Health Check: http://localhost:8000/health"
 echo "  • PostgreSQL: localhost:5432"
 echo
 echo "🔧 Useful Commands:"
-echo "  • View logs: docker-compose logs -f [service]"
-echo "  • Stop all: docker-compose down"
-echo "  • Restart: docker-compose restart [service]"
-echo "  • Shell access: docker-compose exec [service] bash"
+echo "  • View logs: docker-compose -f ../docker/docker-compose.yml logs -f [service]"
+echo "  • Stop all: docker-compose -f ../docker/docker-compose.yml down"
+echo "  • Restart: docker-compose -f ../docker/docker-compose.yml restart [service]"
+echo "  • Shell access: docker-compose -f ../docker/docker-compose.yml exec [service] bash"
 echo
 echo "💡 Try this GraphQL query:"
 echo "   query { listMetropolitanAreas { name code state } }"

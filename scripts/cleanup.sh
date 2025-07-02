@@ -17,7 +17,7 @@ pkill -f "npm run dev" 2>/dev/null
 pkill -f "vite" 2>/dev/null
 
 echo "🐳 Stopping Docker containers..."
-docker-compose down 2>/dev/null
+docker-compose -f ../docker/docker-compose.yml down 2>/dev/null
 
 echo "🧽 Cleaning up temporary files..."
 # Remove Python cache
@@ -48,4 +48,4 @@ echo "Port 5432: $(lsof -ti:5432 2>/dev/null || echo 'Available')"
 
 echo
 echo "✨ Cleanup complete! Ready for Docker development."
-echo "💡 Run './dev-start.sh' to start the Docker environment."
+echo "💡 Run './scripts/dev-start.sh' to start the Docker environment."

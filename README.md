@@ -42,7 +42,10 @@ gymintel-web/
 │   ├── package.json           # Node.js dependencies
 │   └── vite.config.ts         # Vite build config
 ├── shared/                    # Shared types & utilities
-└── docker-compose.yml         # Local development environment
+├── docker/                    # Docker configuration files
+│   └── docker-compose.yml     # Local development environment
+├── scripts/                   # Development and utility scripts
+└── docs/                      # Documentation files
 ```
 
 ## 🎨 GraphQL Schema Design
@@ -140,7 +143,7 @@ git clone https://github.com/a-deal/gymintel-web.git
 cd gymintel-web
 
 # Start with Docker (recommended)
-docker-compose up -d
+docker-compose -f docker/docker-compose.yml up -d
 
 # Or setup manually:
 

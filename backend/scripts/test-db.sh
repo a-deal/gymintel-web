@@ -16,7 +16,7 @@ case "$1" in
   start)
     echo -e "${GREEN}Starting test database...${NC}"
     cd "$PROJECT_ROOT"
-    docker compose -f docker-compose.test.yml up -d
+    docker compose -f docker/docker-compose.test.yml up -d
     echo -e "${GREEN}Waiting for database to be ready...${NC}"
     sleep 5
     echo -e "${GREEN}Test database is running on localhost:5432${NC}"
@@ -25,7 +25,7 @@ case "$1" in
   stop)
     echo -e "${YELLOW}Stopping test database...${NC}"
     cd "$PROJECT_ROOT"
-    docker compose -f docker-compose.test.yml down
+    docker compose -f docker/docker-compose.test.yml down
     echo -e "${GREEN}Test database stopped${NC}"
     ;;
 

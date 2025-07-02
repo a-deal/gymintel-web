@@ -4,7 +4,7 @@
 echo "🏋️ Setting up GymIntel Web Development Environment..."
 
 # Check if we're in the right directory
-if [ ! -f "CLAUDE.md" ]; then
+if [ ! -f "docs/CLAUDE.md" ]; then
     echo "❌ Please run this script from the gymintel-web root directory"
     exit 1
 fi
