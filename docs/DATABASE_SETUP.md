@@ -85,7 +85,7 @@ asyncio.run(init_database())
 To enable automatic database initialization on deployment:
 
 1. Add environment variable in Railway:
-   ```
+   ```bash
    AUTO_INIT_DB=true
    ```
 

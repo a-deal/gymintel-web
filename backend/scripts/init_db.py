@@ -15,7 +15,9 @@ import os
 import sys
 
 # Add parent directory to path so we can import app modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 
 from app.database import Base, engine  # noqa: E402
 from app.db_init import init_database  # noqa: E402
@@ -34,22 +36,30 @@ async def drop_all_tables():
 
 async def run_alembic_migrations():
     """Run Alembic migrations."""
-    import subprocess
+    import asyncio
 
     try:
-        # Run alembic upgrade head
-        result = subprocess.run(
-            ["alembic", "upgrade", "head"],
+        # Run alembic upgrade head asynchronously
+        process = await asyncio.create_subprocess_exec(
+            "alembic",
+            "upgrade",
+            "head",
             cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            capture_output=True,
-            text=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
+        stdout, stderr = await process.communicate()
 
-        if result.returncode == 0:
+        # Decode bytes to string
+        stdout_str = stdout.decode() if stdout else ""
+        stderr_str = stderr.decode() if stderr else ""
+
+        if process.returncode == 0:
             logger.info("Alembic migrations completed successfully")
-            logger.info(result.stdout)
+            if stdout_str:
+                logger.info(stdout_str)
         else:
-            logger.error(f"Alembic migrations failed: {result.stderr}")
+            logger.error(f"Alembic migrations failed: {stderr_str}")
             return False
 
     except Exception as e:

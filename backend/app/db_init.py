@@ -8,6 +8,7 @@ This module ensures the database is properly initialized with:
 
 import asyncio
 import logging
+from urllib.parse import urlparse
 
 from app.config import settings
 from app.database import Base, engine
@@ -24,30 +25,35 @@ async def ensure_postgis_extension():
         return
 
     try:
-        # Create a new engine without database name to connect to postgres db
-        db_url_parts = settings.async_database_url.split("/")
-        base_url = "/".join(db_url_parts[:-1])
-        db_name = db_url_parts[-1].split("?")[0]
+        # Parse the database URL for more robust handling
+        parsed = urlparse(settings.async_database_url)
+        db_name = parsed.path.lstrip("/")
 
-        # Connect to the default 'postgres' database
-        postgres_url = f"{base_url}/postgres"
-        if "asyncpg" in postgres_url:
-            postgres_engine = create_async_engine(postgres_url, echo=False)
-        else:
-            # Convert to async URL if needed
+        # Create postgres database URL by replacing the database name
+        postgres_url = settings.async_database_url.replace(f"/{db_name}", "/postgres")
+
+        # Ensure we're using asyncpg driver
+        if "asyncpg" not in postgres_url:
             postgres_url = postgres_url.replace(
                 "postgresql://", "postgresql+asyncpg://"
             )
-            postgres_engine = create_async_engine(postgres_url, echo=False)
+
+        postgres_engine = create_async_engine(postgres_url, echo=False)
 
         async with postgres_engine.connect() as conn:
-            # First ensure the database exists
+            # First ensure the database exists - use parameterized query to
+            # avoid SQL injection
             result = await conn.execute(
-                text(f"SELECT 1 FROM pg_database WHERE datname = '{db_name}'")
+                text("SELECT 1 FROM pg_database WHERE datname = :db_name"),
+                {"db_name": db_name},
             )
             if not result.scalar():
                 logger.error(f"Database '{db_name}' does not exist")
+                await postgres_engine.dispose()
                 return
+
+        # Clean up the postgres engine
+        await postgres_engine.dispose()
 
         # Now connect to our actual database
         async with engine.connect() as conn:

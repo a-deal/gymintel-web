@@ -73,7 +73,7 @@ You have two options for database initialization:
 ### Option A: Automatic Initialization (Recommended for new projects)
 
 Add this environment variable in Railway:
-```
+```bash
 AUTO_INIT_DB=true
 ```
 
