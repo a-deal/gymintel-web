@@ -5,8 +5,26 @@ Railway startup script with proper environment handling
 import asyncio
 import logging
 import os
+import sys
 
-import uvicorn
+# Add debugging info
+print(f"Python executable: {sys.executable}")
+print(f"Python version: {sys.version}")
+print(f"Python path: {sys.path}")
+print(f"Working directory: {os.getcwd()}")
+print(f"Directory contents: {os.listdir('.')}")
+
+try:
+    import uvicorn
+
+    print(f"Successfully imported uvicorn {uvicorn.__version__}")
+except ImportError as e:
+    print(f"ERROR: Failed to import uvicorn: {e}")
+    print("Attempting to install uvicorn...")
+    import subprocess
+
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "uvicorn[standard]"])
+    import uvicorn
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
