@@ -38,7 +38,6 @@ coverage.xml
 .pytest_cache/
 
 # Virtual environments
-.env
 .venv
 env/
 venv/
@@ -81,7 +80,7 @@ pids
 jspm_packages/
 
 # Optional npm cache directory
-.npm
+# .npm already included above
 
 # Optional REPL history
 .node_repl_history
@@ -93,12 +92,11 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.deployment
+.env*
+!.env.example
+!.env.development
+!.env.staging
+!.env.production
 
 # Database
 *.db
@@ -159,3 +157,13 @@ ipython_config.py
 
 # Test environment
 backend/.env.test
+
+# Vercel
+.vercel
+
+# Railway
+railway.json
+
+# Deployment files
+.env.deployment
+setup-staging-commands.txt

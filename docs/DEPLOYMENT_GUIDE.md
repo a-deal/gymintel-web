@@ -12,7 +12,7 @@ This guide covers deployment strategies for GymIntel Web Application across diff
 
 ## Deployment Flow
 
-```
+```mermaid
 feature/* or fix/* branches
     ↓ (PR)
 staging branch → Staging Environment (auto-deploy)
@@ -25,7 +25,7 @@ main branch → Production Environment (auto-deploy)
 ### Prerequisites
 
 1. **GitHub Secrets** (Required for both environments):
-   ```
+   ```bash
    # Vercel
    VERCEL_TOKEN
    VERCEL_ORG_ID
@@ -51,8 +51,8 @@ main branch → Production Environment (auto-deploy)
    ```
 
 2. **Configure GitHub Integration**:
-   - In Vercel: Settings → Git → Connect Repository
-   - In Railway: Settings → GitHub → Connect Repository
+   - In Vercel: `Settings → Git → Connect Repository`
+   - In Railway: `Settings → GitHub → Connect Repository`
 
 3. **Set deployment branches**:
    - Staging: `staging` branch
@@ -124,6 +124,7 @@ vercel --prod
 ### Backend Environment Variables
 
 #### Development (Local)
+
 ```env
 ENVIRONMENT=development
 DATABASE_URL=postgresql://postgres:password@localhost:5432/gymintel  # pragma: allowlist secret
@@ -137,6 +138,7 @@ GOOGLE_PLACES_API_KEY=your-dev-key
 ```
 
 #### Staging
+
 ```env
 ENVIRONMENT=staging
 DATABASE_URL=(auto-provided by Railway)
@@ -150,6 +152,7 @@ GOOGLE_PLACES_API_KEY=your-staging-key
 ```
 
 #### Production
+
 ```env
 ENVIRONMENT=production
 DATABASE_URL=(auto-provided by Railway)
@@ -165,6 +168,7 @@ GOOGLE_PLACES_API_KEY=your-prod-key
 ### Frontend Environment Variables
 
 #### Development (Local)
+
 ```env
 VITE_ENVIRONMENT=development
 VITE_GRAPHQL_ENDPOINT=http://localhost:8000/graphql
@@ -173,6 +177,7 @@ VITE_DEBUG=true
 ```
 
 #### Staging
+
 ```env
 VITE_ENVIRONMENT=staging
 VITE_GRAPHQL_ENDPOINT=https://gymintel-backend-staging.railway.app/graphql
@@ -181,6 +186,7 @@ VITE_DEBUG=true
 ```
 
 #### Production
+
 ```env
 VITE_ENVIRONMENT=production
 VITE_GRAPHQL_ENDPOINT=https://gymintel-backend.railway.app/graphql
@@ -216,8 +222,8 @@ railway logs --environment production
 
 ### Metrics
 
-- **Vercel**: Dashboard → Analytics → Web Vitals
-- **Railway**: Dashboard → Metrics → Resource Usage
+- **Vercel**: `Dashboard → Analytics → Web Vitals`
+- **Railway**: `Dashboard → Metrics → Resource Usage`
 
 ## Rollback Procedures
 
@@ -234,7 +240,7 @@ vercel rollback [deployment-url]
 ### Railway Rollback
 
 1. Go to Railway Dashboard
-2. Select project → Deployments
+2. Select `project → Deployments`
 3. Click on previous successful deployment
 4. Click "Rollback to this deployment"
 

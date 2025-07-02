@@ -57,7 +57,7 @@ npx vercel env add VITE_MAPBOX_ACCESS_TOKEN staging
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
 2. Select `gymintel-web-staging` project
-3. Go to Settings → Git
+3. Go to `Settings → Git`
 4. Connect to GitHub repository
 5. Set:
    - Production Branch: `staging`
@@ -158,7 +158,7 @@ railway open
 
 1. Go to [Railway Dashboard](https://railway.app/dashboard)
 2. Select `gymintel-backend-staging` project
-3. Go to Settings → GitHub
+3. Go to `Settings → GitHub`
 4. Connect repository
 5. Set:
    - Deploy on push: Enable
@@ -211,7 +211,7 @@ VITE_DEBUG=true
 
 ### Recommended Git Flow
 
-```
+```mermaid
 main (production)
   └── staging (staging environment)
        └── feature/* (feature branches)
@@ -235,8 +235,8 @@ git push -u origin staging
 
 ### 2. Verify Deployments
 
-- **Vercel**: Check https://gymintel-web-staging.vercel.app
-- **Railway**: Check https://gymintel-backend-staging.railway.app/health
+- **Vercel**: Check `https://gymintel-web-staging.vercel.app`
+- **Railway**: Check `https://gymintel-backend-staging.railway.app/health`
 
 ### 3. Test GraphQL Connection
 
@@ -254,27 +254,27 @@ curl https://gymintel-backend-staging.railway.app/graphql \
 | Variable | Development (Local) | Staging | Production |
 |----------|-------------------|---------|------------|
 | VITE_ENVIRONMENT | development | staging | production |
-| VITE_GRAPHQL_ENDPOINT | http://localhost:8000/graphql | https://gymintel-backend-staging.railway.app/graphql | https://gymintel-backend.railway.app/graphql |
-| VITE_MAPBOX_ACCESS_TOKEN | same-token | same-token |
-| VITE_DEBUG | true | false |
+| VITE_GRAPHQL_ENDPOINT | `http://localhost:8000/graphql` | `https://gymintel-backend-staging.railway.app/graphql` | `https://gymintel-backend.railway.app/graphql` |
+| VITE_MAPBOX_ACCESS_TOKEN | same-token | same-token | same-token |
+| VITE_DEBUG | true | true | false |
 
 ### Railway (Backend)
 
 | Variable | Development (Local) | Staging | Production |
 |----------|-------------------|---------|------------|
 | ENVIRONMENT | development | staging | production |
-| DATABASE_URL | (auto) | (auto) |
-| ASYNC_DATABASE_URL | (same as DATABASE_URL) | (same as DATABASE_URL) |
-| AUTO_INIT_DB | true | false |
-| SEED_DATABASE | true | false |
-| CORS_ORIGINS | http://localhost:3000 | staging URLs | prod URLs |
-| LOG_LEVEL | DEBUG | INFO |
+| DATABASE_URL | (local) | (auto) | (auto) |
+| ASYNC_DATABASE_URL | (local) | (same as DATABASE_URL) | (same as DATABASE_URL) |
+| AUTO_INIT_DB | true | true | false |
+| SEED_DATABASE | true | true | false |
+| CORS_ORIGINS | `http://localhost:3000` | staging URLs | prod URLs |
+| LOG_LEVEL | DEBUG | DEBUG | INFO |
 
 ## Monitoring Staging Environment
 
 ### Vercel Analytics
 
-1. Go to Vercel Dashboard → Analytics
+1. Go to `Vercel Dashboard → Analytics`
 2. Monitor:
    - Build times
    - Error rates
@@ -282,7 +282,7 @@ curl https://gymintel-backend-staging.railway.app/graphql \
 
 ### Railway Metrics
 
-1. Go to Railway Dashboard → Metrics
+1. Go to `Railway Dashboard → Metrics`
 2. Monitor:
    - CPU usage
    - Memory usage

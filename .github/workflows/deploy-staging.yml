@@ -27,10 +27,10 @@ jobs:
 
       - name: Deploy to Railway
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_STAGING_TOKEN }}
         run: |
           cd backend
-          railway link ${{ secrets.RAILWAY_PROJECT_ID_STAGING }}
+          railway link ${{ secrets.RAILWAY_STAGING_PROJECT_ID }}
           railway up --environment staging
 
   deploy-frontend:
@@ -56,7 +56,7 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGING }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID }}
         run: |
           cd frontend
           vercel pull --yes --environment=staging --token=$VERCEL_TOKEN

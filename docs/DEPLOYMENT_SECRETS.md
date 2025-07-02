@@ -6,31 +6,31 @@ This document lists all the required GitHub secrets for successful deployment of
 
 ### Vercel Deployment (Frontend)
 - **VERCEL_TOKEN**: Your Vercel personal access token
-  - Get it from: https://vercel.com/account/tokens
+  - Get it from: <https://vercel.com/account/tokens>
 - **VERCEL_ORG_ID**: Your Vercel organization ID
   - Find in Vercel project settings
 - **VERCEL_PROJECT_ID**: Your Vercel project ID (Production)
   - Find in Vercel project settings
-- **VERCEL_PROJECT_ID_STAGING**: Your Vercel staging project ID
+- **VERCEL_STAGING_PROJECT_ID**: Your Vercel staging project ID
   - Find in Vercel staging project settings
 
 ### Railway Deployment (Backend)
 - **RAILWAY_TOKEN**: Your Railway API token (Production)
-  - Get it from: https://railway.app/account/tokens
-- **RAILWAY_TOKEN_STAGING**: Your Railway API token (Staging)
-  - Get it from: https://railway.app/account/tokens (same token can be used)
+  - Get it from: <https://railway.app/account/tokens>
+- **RAILWAY_STAGING_TOKEN**: Your Railway API token (Staging)
+  - Get it from: <https://railway.app/account/tokens> (same token can be used)
 - **RAILWAY_PROJECT_ID**: Your Railway project ID (Production)
   - Find in Railway project settings
-- **RAILWAY_PROJECT_ID_STAGING**: Your Railway staging project ID
+- **RAILWAY_STAGING_PROJECT_ID**: Your Railway staging project ID
   - Find in Railway staging project settings
 
 ### API Keys
 - **MAPBOX_ACCESS_TOKEN**: Mapbox API key for maps
-  - Get it from: https://account.mapbox.com/
+  - Get it from: <https://account.mapbox.com/>
 - **YELP_API_KEY**: Yelp Fusion API key
-  - Get it from: https://www.yelp.com/developers
+  - Get it from: <https://www.yelp.com/developers>
 - **GOOGLE_PLACES_API_KEY**: Google Places API key
-  - Get it from: https://console.cloud.google.com/
+  - Get it from: <https://console.cloud.google.com/>
 
 ### Production URLs
 - **PRODUCTION_GRAPHQL_ENDPOINT**: Your backend GraphQL endpoint URL

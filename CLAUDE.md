@@ -47,7 +47,7 @@
 | Production | https://gymintel-web.vercel.app | https://gymintel-backend.railway.app | main |
 
 ### Deployment Flow:
-```
+```mermaid
 feature/* or fix/* branches
     ↓ (PR)
 staging branch → Staging Environment (auto-deploy)
