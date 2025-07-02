@@ -7,11 +7,17 @@ startCommand = "python start.py"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 3
+restartPolicyMaxRetries = 5
 
 [[services]]
-name = "gymintel-backend"
+name = "gymintel-backend-staging"
 type = "web"
 
-[services.gymintel-backend]
+[services.gymintel-backend-staging]
 port = 8000
+
+[env]
+ENVIRONMENT = "staging"
+AUTO_INIT_DB = "true"
+SEED_DATABASE = "true"
+LOG_LEVEL = "DEBUG"

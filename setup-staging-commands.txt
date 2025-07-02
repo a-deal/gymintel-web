@@ -1,0 +1,73 @@
+# Vercel Staging Setup Commands
+
+## After creating the staging project, run these commands:
+
+# 1. Set environment variables for staging
+npx vercel env add VITE_ENVIRONMENT
+# When prompted, enter: staging
+
+npx vercel env add VITE_GRAPHQL_ENDPOINT
+# When prompted, enter: https://gymintel-backend-staging.railway.app/graphql
+
+npx vercel env add VITE_MAPBOX_ACCESS_TOKEN
+# When prompted, enter: your-mapbox-token
+
+npx vercel env add VITE_DEBUG
+# When prompted, enter: true
+
+# 2. Get project details
+cat .vercel/project.json
+# Save the projectId for GitHub secrets
+
+# 3. List projects to confirm
+npx vercel project ls
+
+---
+
+# Railway Staging Setup Commands
+
+# 1. Login to Railway (if not already)
+railway login
+
+# 2. Create new staging project
+railway init
+# When prompted:
+# - Enter project name: gymintel-backend-staging
+
+# 3. Link to the project
+railway link
+# Select: gymintel-backend-staging
+
+# 4. Add PostgreSQL database
+railway add
+# Select: PostgreSQL
+
+# 5. Set environment variables
+railway variables set ENVIRONMENT=staging
+railway variables set AUTO_INIT_DB=true
+railway variables set SEED_DATABASE=true
+railway variables set CORS_ORIGINS=https://gymintel-web-staging.vercel.app,http://localhost:3000
+railway variables set LOG_LEVEL=DEBUG
+
+# 6. Set database URL
+railway variables set ASYNC_DATABASE_URL='$DATABASE_URL'
+
+# 7. Get project ID
+railway status
+
+# 8. Deploy
+cd ../backend
+railway up
+
+---
+
+# GitHub Secrets to Add
+
+After getting the IDs, add these secrets to your GitHub repo:
+
+VERCEL_PROJECT_ID_STAGING=<staging-project-id>
+RAILWAY_PROJECT_ID_STAGING=<staging-project-id>
+RAILWAY_TOKEN_STAGING=<your-railway-token>
+
+# Get Railway token from: https://railway.app/account/tokens
+# Get Vercel token from: https://vercel.com/account/tokens

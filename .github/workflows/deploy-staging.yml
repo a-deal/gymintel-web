@@ -1,0 +1,93 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test.yml
+
+  deploy-backend:
+    name: Deploy Backend to Railway Staging
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_STAGING_TOKEN }}
+        run: |
+          cp backend/railway.staging.toml railway.toml
+          railway link ${{ secrets.RAILWAY_STAGING_PROJECT_ID }}
+          railway up --service gymintel-backend-staging --environment staging
+
+  deploy-frontend:
+    name: Deploy Frontend to Vercel Staging
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID }}
+        run: |
+          cd frontend
+          vercel pull --yes --environment=staging --token=$VERCEL_TOKEN
+          vercel build --token=$VERCEL_TOKEN
+          vercel deploy --prebuilt --token=$VERCEL_TOKEN --env=staging
+
+  preview-deployment:
+    name: Preview Deployment URLs
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Comment deployment URLs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## 🚀 Staging Deployment Complete!
+
+            ### URLs:
+            - **Frontend**: https://gymintel-web-staging.vercel.app
+            - **Backend**: https://gymintel-backend-staging.railway.app
+            - **GraphQL Playground**: https://gymintel-backend-staging.railway.app/graphql
+
+            ### Health Checks:
+            - Backend: https://gymintel-backend-staging.railway.app/health
+            - API Docs: https://gymintel-backend-staging.railway.app/docs`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
