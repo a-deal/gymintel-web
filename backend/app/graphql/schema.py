@@ -149,10 +149,12 @@ class SearchProgress:
     """Real-time search progress updates"""
 
     search_id: str
-    status: str  # pending, searching_yelp, searching_google, merging, complete
+    status: str  # pending, searching_yelp, searching_google, merging, complete, error
     progress_percentage: float
     current_step: str
     estimated_completion: Optional[datetime] = None
+    message: Optional[str] = None
+    location_info: Optional[str] = None  # JSON with city, state, zipcode info
 
 
 @strawberry.type
@@ -218,15 +220,20 @@ class Query:
     @strawberry.field
     async def search_gyms(
         self,
-        zipcode: str,
+        location: str,  # Can be zipcode or city name
         radius: float = 10.0,
         limit: int = 50,
         filters: Optional[SearchFilters] = None,
     ) -> SearchResult:
-        """Search for gyms in a specific area with intelligent filtering"""
+        """
+        Search for gyms by location (zipcode or city name).
+        If no data exists, automatically fetches from external sources.
+        """
         from .resolvers import GymResolvers
 
-        return await GymResolvers.search_gyms(zipcode, radius, limit, filters)
+        return await GymResolvers.search_gyms_by_location(
+            location, radius, limit, filters
+        )
 
     @strawberry.field
     async def gym_by_id(self, gym_id: strawberry.ID) -> Optional[Gym]:
@@ -308,12 +315,14 @@ class Mutation:
         )
 
     @strawberry.field
-    async def trigger_cli_import(self, zipcode: str, radius: float = 10.0) -> str:
-        """Trigger a CLI search and import results (returns search_id)"""
-        # TODO: Implement async CLI search triggering
-        import uuid
+    async def trigger_gym_search(self, location: str, radius: float = 10.0) -> str:
+        """
+        Trigger a gym search for a location (city or zipcode).
+        Returns a search_id to track progress via subscription.
+        """
+        from .resolvers import MutationResolvers
 
-        return str(uuid.uuid4())
+        return await MutationResolvers.trigger_gym_search(location, radius)
 
 
 # Subscription Root
@@ -338,13 +347,34 @@ class Subscription:
     @strawberry.subscription
     async def search_progress(self, search_id: str) -> SearchProgress:
         """Subscribe to search progress updates"""
-        # Real-time progress for long-running searches
-        # Placeholder implementation
-        import asyncio
+        from ..services.search_progress import search_progress_manager
 
-        await asyncio.sleep(1)
-        return  # This will never execute, but satisfies the type checker
-        yield  # Unreachable code, but keeps the async generator signature
+        try:
+            # Subscribe to updates for this search
+            queue = await search_progress_manager.subscribe(search_id)
+
+            # Yield progress updates until complete
+            while True:
+                progress = await queue.get()
+                yield progress
+
+                # Stop when search is complete or errored
+                if progress.status in ["complete", "error"]:
+                    break
+
+        except ValueError:
+            # Search not found
+            yield SearchProgress(
+                search_id=search_id,
+                status="error",
+                progress_percentage=0.0,
+                current_step="Search not found",
+                message=f"Search ID {search_id} not found",
+            )
+        finally:
+            # Clean up subscription
+            if "queue" in locals():
+                search_progress_manager.unsubscribe(search_id, queue)
 
 
 # Schema definition

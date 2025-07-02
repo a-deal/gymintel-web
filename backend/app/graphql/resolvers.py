@@ -12,6 +12,8 @@ from sqlalchemy.orm import selectinload
 from ..database import get_db_session
 from ..models.gym import DataSource, Gym
 from ..services.cli_bridge import cli_bridge_service
+from ..services.geocoding import geocoding_service
+from ..services.search_progress import search_progress_manager
 from .schema import Coordinates
 from .schema import DataSource as DataSourceType
 from .schema import Gym as GymType
@@ -24,13 +26,36 @@ class GymResolvers:
     """Resolvers for Gym-related GraphQL operations"""
 
     @staticmethod
-    async def search_gyms(
-        zipcode: str,
+    async def search_gyms_by_location(
+        location: str,
         radius: float = 10.0,
         limit: int = 50,
         filters: Optional[SearchFilters] = None,
     ) -> SearchResult:
         """Search for gyms in a specific area"""
+
+        # Convert location to zipcode if needed
+        zipcode, location_info = await geocoding_service.search_location(location)
+
+        if not zipcode and not location_info:
+            # Could not geocode the location
+            return SearchResult(
+                zipcode=location,
+                coordinates=Coordinates(latitude=0.0, longitude=0.0),
+                radius_miles=radius,
+                timestamp=datetime.utcnow(),
+                gyms=[],
+                total_results=0,
+                yelp_results=0,
+                google_results=0,
+                merged_count=0,
+                avg_confidence=0.0,
+                execution_time_seconds=0.0,
+                use_google=True,
+            )
+
+        # Use zipcode if available, otherwise use location for coordinate search
+        search_zipcode = zipcode or location
 
         # First, try to get from database
         async with get_db_session() as session:
@@ -40,8 +65,8 @@ class GymResolvers:
             )
 
             # Apply zipcode filter if we have existing data
-            if zipcode:
-                query = query.where(Gym.source_zipcode == zipcode)
+            if search_zipcode:
+                query = query.where(Gym.source_zipcode == search_zipcode)
 
             # Apply additional filters
             if filters:
@@ -67,10 +92,18 @@ class GymResolvers:
             # If we have recent data, return it
             if existing_gyms:
                 return SearchResult(
-                    zipcode=zipcode,
+                    zipcode=search_zipcode,
                     coordinates=Coordinates(
-                        latitude=existing_gyms[0].latitude if existing_gyms else 0.0,
-                        longitude=existing_gyms[0].longitude if existing_gyms else 0.0,
+                        latitude=(
+                            location_info.get("latitude", existing_gyms[0].latitude)
+                            if location_info
+                            else existing_gyms[0].latitude
+                        ),
+                        longitude=(
+                            location_info.get("longitude", existing_gyms[0].longitude)
+                            if location_info
+                            else existing_gyms[0].longitude
+                        ),
                     ),
                     radius_miles=radius,
                     timestamp=datetime.utcnow(),
@@ -102,7 +135,7 @@ class GymResolvers:
         # If no existing data, fetch from CLI
         try:
             cli_result = await cli_bridge_service.search_gyms_via_cli(
-                zipcode=zipcode, radius=radius, use_google=True
+                zipcode=search_zipcode, radius=radius, use_google=True
             )
 
             # Store results in database
@@ -590,4 +623,124 @@ class MutationResolvers:
                 gyms_updated=0,
                 errors=[f"Import failed: {str(e)}"],
                 import_duration_seconds=0.0,
+            )
+
+    @staticmethod
+    async def trigger_gym_search(location: str, radius: float = 10.0) -> str:
+        """
+        Trigger a gym search for a location.
+        Returns a search_id to track progress via subscription.
+        """
+        import asyncio
+
+        # Create search in progress manager
+        search_id = search_progress_manager.create_search(location, radius)
+
+        # Start the search asynchronously
+        asyncio.create_task(
+            MutationResolvers._perform_gym_search(search_id, location, radius)
+        )
+
+        return search_id
+
+    @staticmethod
+    async def _perform_gym_search(search_id: str, location: str, radius: float):
+        """Perform the actual gym search with progress updates."""
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        try:
+            # Step 1: Geocoding (10% progress)
+            await search_progress_manager.update_progress(
+                search_id, "geocoding", 10.0, "Converting location to coordinates"
+            )
+
+            zipcode, location_info = await geocoding_service.search_location(location)
+
+            if not zipcode and not location_info:
+                await search_progress_manager.update_progress(
+                    search_id,
+                    "error",
+                    10.0,
+                    "Location not found",
+                    message=f"Could not find location: {location}",
+                )
+                return
+
+            # Update with location info
+            await search_progress_manager.update_progress(
+                search_id,
+                "searching",
+                20.0,
+                "Location found",
+                location_info=location_info,
+            )
+
+            search_zipcode = zipcode or location
+
+            # Step 2: Check database (30% progress)
+            await search_progress_manager.update_progress(
+                search_id, "searching", 30.0, "Checking existing data"
+            )
+
+            async with get_db_session() as session:
+                query = select(Gym).where(Gym.source_zipcode == search_zipcode).limit(1)
+                result = await session.execute(query)
+                existing_gym = result.scalar_one_or_none()
+
+                if existing_gym:
+                    # We already have data
+                    await search_progress_manager.update_progress(
+                        search_id,
+                        "complete",
+                        100.0,
+                        "Search complete",
+                        message="Found existing gym data in database",
+                    )
+                    return
+
+            # Step 3: Search Yelp (50% progress)
+            await search_progress_manager.update_progress(
+                search_id, "searching_yelp", 50.0, "Searching Yelp for gyms"
+            )
+
+            # Step 4: Search Google (70% progress)
+            await search_progress_manager.update_progress(
+                search_id, "searching_google", 70.0, "Searching Google Places"
+            )
+
+            # Step 5: Perform actual CLI search
+            try:
+                cli_result = await cli_bridge_service.search_gyms_via_cli(
+                    zipcode=search_zipcode, radius=radius, use_google=True
+                )
+
+                # Step 6: Merge and store results (90% progress)
+                await search_progress_manager.update_progress(
+                    search_id, "merging", 90.0, "Merging and storing results"
+                )
+
+                await GymResolvers._store_cli_results(cli_result)
+
+                # Complete (100% progress)
+                gym_count = len(cli_result.get("gyms", []))
+                await search_progress_manager.update_progress(
+                    search_id,
+                    "complete",
+                    100.0,
+                    "Search complete",
+                    message=f"Found {gym_count} gyms",
+                )
+
+            except Exception as e:
+                logger.error(f"CLI search failed: {e}")
+                await search_progress_manager.update_progress(
+                    search_id, "error", 90.0, "Search failed", message=str(e)
+                )
+
+        except Exception as e:
+            logger.error(f"Search failed: {e}")
+            await search_progress_manager.update_progress(
+                search_id, "error", 0.0, "Search failed", message=str(e)
             )
