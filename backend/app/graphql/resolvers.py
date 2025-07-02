@@ -326,6 +326,10 @@ class GymResolvers:
         """Store CLI search results in database"""
         async with get_db_session() as session:
             gyms_data = cli_result.get("gyms", [])
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.info(f"Storing {len(gyms_data)} gyms from CLI search")
 
             for gym_data in gyms_data:
                 # Check if gym already exists
@@ -343,8 +347,11 @@ class GymResolvers:
                     existing_gym.rating = gym_data.get("rating")
                     existing_gym.review_count = gym_data.get("review_count", 0)
                     existing_gym.updated_at = datetime.utcnow()
+                    logger.info(f"Updated existing gym: {existing_gym.name}")
                 else:
                     # Create new gym
+                    from geoalchemy2 import WKTElement
+
                     new_gym = Gym(
                         name=gym_data["name"],
                         address=gym_data["address"],
@@ -353,8 +360,9 @@ class GymResolvers:
                         instagram=gym_data.get("instagram"),
                         latitude=gym_data["latitude"],
                         longitude=gym_data["longitude"],
-                        location=(
-                            f"POINT({gym_data['longitude']} {gym_data['latitude']})"
+                        location=WKTElement(
+                            f"POINT({gym_data['longitude']} {gym_data['latitude']})",
+                            srid=4326,
                         ),
                         confidence=gym_data["confidence"],
                         match_confidence=gym_data["confidence"],
@@ -366,6 +374,7 @@ class GymResolvers:
                     )
                     session.add(new_gym)
                     await session.flush()  # Get the ID
+                    logger.info(f"Created new gym: {new_gym.name}")
 
                     # Add data sources
                     for source_data in gym_data.get("sources", []):
@@ -378,6 +387,9 @@ class GymResolvers:
                             ),
                         )
                         session.add(data_source)
+
+            await session.commit()
+            logger.info("Successfully committed CLI search results to database")
 
     @staticmethod
     def _gym_to_graphql(gym: Gym) -> GymType:
@@ -533,6 +545,8 @@ class MutationResolvers:
                             gyms_updated += 1
                         else:
                             # Create new
+                            from geoalchemy2 import WKTElement
+
                             new_gym = Gym(
                                 name=gym_data.name,
                                 address=gym_data.address,
@@ -541,8 +555,9 @@ class MutationResolvers:
                                 instagram=gym_data.instagram,
                                 latitude=gym_data.latitude,
                                 longitude=gym_data.longitude,
-                                location=(
-                                    f"POINT({gym_data.longitude} {gym_data.latitude})"
+                                location=WKTElement(
+                                    f"POINT({gym_data.longitude} {gym_data.latitude})",
+                                    srid=4326,
                                 ),
                                 confidence=gym_data.confidence,
                                 match_confidence=gym_data.confidence,

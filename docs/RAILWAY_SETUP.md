@@ -66,17 +66,39 @@ ENVIRONMENT=production
 2. Check the deployment logs for any errors
 3. Once deployed, you'll get a URL like: `https://your-app.railway.app`
 
-## Step 7: Run Database Migrations
+## Step 7: Initialize Database
 
-After first deployment:
+You have two options for database initialization:
 
+### Option A: Automatic Initialization (Recommended for new projects)
+
+Add this environment variable in Railway:
 ```bash
-# Using Railway CLI
-railway run --service=your-backend-service cd backend && alembic upgrade head
-
-# Or in Railway shell
-cd backend && alembic upgrade head
+AUTO_INIT_DB=true
 ```
+
+The application will automatically:
+- Create PostGIS extension
+- Create all required tables
+- Run initial setup on first startup
+
+### Option B: Manual Initialization (Recommended for production)
+
+1. **Enable PostGIS Extension**:
+   ```bash
+   railway run psql -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+   ```
+
+2. **Run Database Migrations**:
+   ```bash
+   # Using Railway CLI
+   railway run --service=your-backend-service cd backend && alembic upgrade head
+
+   # Or using the init script
+   railway run --service=your-backend-service cd backend && python scripts/init_db.py
+   ```
+
+**Note**: After initial setup, set `AUTO_INIT_DB=false` in production to prevent accidental recreation.
 
 ## Common Issues
 
