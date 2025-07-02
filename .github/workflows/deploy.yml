@@ -24,19 +24,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm install
-
-      - name: Build frontend
-        env:
-          VITE_GRAPHQL_ENDPOINT: ${{ secrets.PRODUCTION_GRAPHQL_ENDPOINT }}
-          VITE_MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
-        run: |
-          cd frontend
-          npm run build
-
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
