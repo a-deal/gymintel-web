@@ -18,6 +18,9 @@ reviews:
       enabled: true
     shellcheck:
       enabled: true
+    # JavaScript/TypeScript linting with oxc
+    oxc:
+      enabled: true
 
   # Path-specific settings
   path_instructions:
