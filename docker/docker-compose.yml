@@ -14,7 +14,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
+      - ../database/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gymintel -d gymintel"]
       interval: 10s
@@ -24,7 +24,7 @@ services:
   # FastAPI backend with GraphQL
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile.dev
     container_name: gymintel-backend
     environment:
@@ -39,8 +39,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
-      - ../gymintel-cli/src:/app/cli_services  # Mount CLI services
+      - ../backend:/app
+      - ../../gymintel-cli/src:/app/cli_services  # Mount CLI services
     depends_on:
       database:
         condition: service_healthy
@@ -54,7 +54,7 @@ services:
   # React frontend
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile.dev
     container_name: gymintel-frontend
     environment:
@@ -63,7 +63,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ../frontend:/app
       - /app/node_modules
     depends_on:
       - backend
