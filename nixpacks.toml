@@ -5,12 +5,15 @@ nixPkgs = ["python311", "postgresql", "gcc"]
 cmds = [
     "ls -la",
     "ls -la backend/",
-    "python3 -m pip install --upgrade pip",
-    "python3 -m pip install -r backend/requirements.txt"
+    "which python || echo 'python not found'",
+    "which python3 || echo 'python3 not found'",
+    "which python3.11 || echo 'python3.11 not found'",
+    "python3.11 -m pip install --upgrade pip",
+    "python3.11 -m pip install -r backend/requirements.txt"
 ]
 
 [start]
-cmd = "python3 backend/start.py"
+cmd = "python3.11 backend/start.py"
 
 [variables]
 PYTHONUNBUFFERED = "1"
