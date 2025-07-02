@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy requirements first (better caching)
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip && \
@@ -24,7 +24,7 @@ RUN pip install --upgrade pip && \
 RUN python -c "import uvicorn; print(f'uvicorn {uvicorn.__version__} installed successfully')"
 
 # Copy application code
-COPY . .
+COPY backend/ .
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash appuser && \
