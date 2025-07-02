@@ -56,8 +56,20 @@ jobs:
       - name: Run frontend tests
         run: |
           cd frontend
-          npm run test || echo "Tests failed but continuing..."
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
+            npm run test -- --coverage || echo "Tests failed but continuing..."
+          else
+            npm run test || echo "Tests failed but continuing..."
+          fi
         continue-on-error: true
+
+      - name: Upload frontend coverage to Codecov
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
 
   backend-tests:
     name: Backend Tests
@@ -119,7 +131,19 @@ jobs:
           ENVIRONMENT: testing
         run: |
           cd backend
-          pytest -x  # Stop on first failure for faster feedback
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
+            pytest --cov=app --cov-report=xml
+          else
+            pytest -x  # Stop on first failure for faster feedback
+          fi
+
+      - name: Upload backend coverage to Codecov
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
 
   docker-build:
     name: Docker Build Test
