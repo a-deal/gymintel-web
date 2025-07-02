@@ -175,8 +175,39 @@ alembic history
    - Always backup before migrations
 3. **Testing**: Each test creates its own schema using `create_tables()`
 
+## Data Seeding
+
+After setting up the database, you'll want to populate it with data:
+
+1. **Development**: Use sample data for testing
+   ```bash
+   # Enable automatic seeding on startup
+   SEED_DATABASE=true docker-compose up
+
+   # Or manually seed
+   cd backend && python scripts/seed_db.py
+   ```
+
+2. **Production**: Configure JIT (Just-In-Time) data fetching
+   - Data is automatically fetched when users search
+   - No need to pre-seed all zipcodes
+   - See [Database Seeding Guide](./DATABASE_SEEDING.md) for details
+
+3. **Import Existing Data**: Use CLI exports
+   ```bash
+   python scripts/seed_db.py --import-file exports/gyms_data.json
+   ```
+
+## Next Steps
+
+1. **Seed the Database**: Follow the [Database Seeding Guide](./DATABASE_SEEDING.md)
+2. **Test the Setup**: Run the test suite to verify everything works
+3. **Start Development**: Launch the development environment
+4. **Monitor Performance**: Use database tools to optimize queries
+
 ## Related Documentation
 
+- [Database Seeding Guide](./DATABASE_SEEDING.md)
 - [Railway Setup Guide](./RAILWAY_SETUP.md)
 - [API Documentation](./backend/README.md)
 - [Development Guide](./CONTRIBUTING.md)

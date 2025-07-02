@@ -65,6 +65,19 @@ async def startup_event():
         except Exception as e:
             logger.error(f"Failed to initialize database: {e}")
 
+    # Seed database with sample data if requested
+    if (
+        settings.environment == "development"
+        and os.environ.get("SEED_DATABASE", "false").lower() == "true"
+    ):
+        try:
+            from app.seed_data import seed_development_data
+
+            await seed_development_data()
+            logger.info("Database seeded with sample data")
+        except Exception as e:
+            logger.error(f"Failed to seed database: {e}")
+
 
 @app.get("/")
 async def root():
