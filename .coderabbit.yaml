@@ -79,6 +79,4 @@ chat:
   auto_reply: true
 
 # Early access features
-early_access:
-  # Enable new features as they become available
-  enabled: true
+early_access: true
