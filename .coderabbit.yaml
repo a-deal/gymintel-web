@@ -1,0 +1,84 @@
+# CodeRabbit Configuration
+# Documentation: https://docs.coderabbit.ai/
+
+reviews:
+  # Enable high-quality reviews
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  # Tools and analysis
+  tools:
+    # Code quality tools
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+
+  # Path-specific settings
+  path_instructions:
+    - path: "backend/**"
+      instructions: |
+        Focus on:
+        - FastAPI best practices
+        - GraphQL resolver efficiency
+        - Database query optimization
+        - Security considerations
+        - Type hints and Pydantic models
+
+    - path: "frontend/**"
+      instructions: |
+        Focus on:
+        - React best practices and hooks usage
+        - TypeScript type safety
+        - Tailwind CSS conventions
+        - Component reusability
+        - Performance optimizations
+
+    - path: "database/**"
+      instructions: |
+        Focus on:
+        - SQL query performance
+        - Index usage
+        - PostGIS spatial queries
+        - Migration safety
+
+  # Auto-approve settings
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "DRAFT"
+
+# Language-specific settings
+language_defaults:
+  system_instructions: |
+    You are reviewing a GymIntel web application that helps users find gyms.
+    The stack includes:
+    - Backend: FastAPI, Strawberry GraphQL, SQLAlchemy, PostgreSQL with PostGIS
+    - Frontend: React, TypeScript, Vite, Tailwind CSS, Mapbox
+    - Infrastructure: Docker, GitHub Actions, Railway (backend), Vercel (frontend)
+
+    Pay special attention to:
+    - Security vulnerabilities
+    - Performance issues
+    - Code maintainability
+    - Best practices for each technology
+    - Accessibility concerns
+
+  summarize_suggestions: true
+
+# Chat settings
+chat:
+  # Additional context for chat interactions
+  auto_reply: true
+
+# Early access features
+early_access:
+  # Enable new features as they become available
+  enabled: true
