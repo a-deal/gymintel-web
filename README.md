@@ -1,5 +1,7 @@
 # GymIntel Web Application 🏋️‍♂️🌐
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/a-deal/gymintel-web?utm_source=oss&utm_medium=github&utm_campaign=a-deal%2Fgymintel-web&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 A comprehensive **web-based gym discovery platform** with interactive maps, data visualization, and persistent storage. Built with **GraphQL, FastAPI, React, and PostgreSQL**.
 
 > **🔗 Related Projects**: This is the web application version of [GymIntel CLI](https://github.com/a-deal/gymintel-cli), which provides the stable command-line interface.
