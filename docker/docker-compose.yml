@@ -35,6 +35,7 @@ services:
       - YELP_API_KEY=${YELP_API_KEY}
       - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
       - ENVIRONMENT=${ENVIRONMENT:-development}
+      - AUTO_INIT_DB=${AUTO_INIT_DB:-true}
     ports:
       - "8000:8000"
     volumes:

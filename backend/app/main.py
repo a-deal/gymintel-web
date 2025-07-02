@@ -3,12 +3,18 @@ GymIntel Web Application - FastAPI + GraphQL Backend
 High-performance gym discovery platform with PostgreSQL and real-time updates
 """
 
+import logging
+import os
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 
+from .config import settings
 from .graphql.schema import schema
+
+logger = logging.getLogger(__name__)
 
 # Create FastAPI application
 app = FastAPI(
@@ -39,6 +45,25 @@ graphql_app = GraphQLRouter(
 
 # Include GraphQL router
 app.include_router(graphql_app, prefix="/graphql")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize the application."""
+    logger.info("Starting GymIntel API...")
+
+    # Auto-initialize database in development if requested
+    if (
+        settings.environment == "development"
+        and os.environ.get("AUTO_INIT_DB", "false").lower() == "true"
+    ):
+        try:
+            from app.db_init import init_database
+
+            await init_database()
+            logger.info("Database initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}")
 
 
 @app.get("/")
