@@ -163,6 +163,7 @@ backend/.env.test
 
 # Railway
 railway.json
+.railway
 
 # Deployment files
 .env.deployment

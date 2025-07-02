@@ -29,9 +29,9 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_STAGING_TOKEN }}
         run: |
-          cd backend
+          cp backend/railway.staging.toml railway.toml
           railway link ${{ secrets.RAILWAY_STAGING_PROJECT_ID }}
-          railway up --environment staging
+          railway up --service gymintel-backend-staging --environment staging
 
   deploy-frontend:
     name: Deploy Frontend to Vercel Staging
