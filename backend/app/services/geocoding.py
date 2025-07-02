@@ -17,13 +17,17 @@ logger = logging.getLogger(__name__)
 class GeocodingService:
     """Service for geocoding operations."""
 
-    def __init__(self):
-        """Initialize the geocoding service."""
+    def __init__(self, timeout: int = 10):
+        """Initialize the geocoding service.
+
+        Args:
+            timeout: Timeout in seconds for geocoding requests (default: 10)
+        """
         # Create SSL context with proper certificates
         ctx = ssl.create_default_context(cafile=certifi.where())
 
         self.geolocator = Nominatim(
-            user_agent="gymintel-web/1.0", timeout=10, ssl_context=ctx
+            user_agent="gymintel-web/1.0", timeout=timeout, ssl_context=ctx
         )
 
     async def search_location(self, query: str) -> Tuple[Optional[str], Optional[dict]]:

@@ -70,7 +70,7 @@ class SearchProgressManager:
             search["location_info"] = json.dumps(location_info)
 
         # Update estimated completion based on progress
-        if status != "complete" and status != "error":
+        if status not in ["complete", "error"]:
             remaining_time = (100 - progress) * 0.3  # ~0.3 seconds per percent
             search["estimated_completion"] = datetime.utcnow() + timedelta(
                 seconds=remaining_time
@@ -133,11 +133,11 @@ class SearchProgressManager:
 
     def unsubscribe(self, search_id: str, queue: asyncio.Queue):
         """Unsubscribe from search progress updates."""
+        from contextlib import suppress
+
         if search_id in self._subscribers:
-            try:
+            with suppress(ValueError):
                 self._subscribers[search_id].remove(queue)
-            except ValueError:
-                pass
 
     async def _cleanup_search(self, search_id: str, delay: int = 300):
         """Clean up search data after a delay (5 minutes default)."""

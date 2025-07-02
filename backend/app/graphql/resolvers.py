@@ -646,6 +646,42 @@ class MutationResolvers:
     @staticmethod
     async def _perform_gym_search(search_id: str, location: str, radius: float):
         """Perform the actual gym search with progress updates."""
+        import asyncio
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        # Set a 5-minute timeout for the entire search operation
+        search_timeout = 300  # 5 minutes
+
+        try:
+            # Run the search with a timeout
+            await asyncio.wait_for(
+                MutationResolvers._perform_gym_search_internal(
+                    search_id, location, radius
+                ),
+                timeout=search_timeout,
+            )
+        except asyncio.TimeoutError:
+            logger.error(f"Search {search_id} timed out after {search_timeout} seconds")
+            await search_progress_manager.update_progress(
+                search_id,
+                "error",
+                0.0,
+                "Search timed out",
+                message=f"Search operation exceeded {search_timeout} seconds",
+            )
+        except Exception as e:
+            logger.error(f"Search failed: {e}")
+            await search_progress_manager.update_progress(
+                search_id, "error", 0.0, "Search failed", message=str(e)
+            )
+
+    @staticmethod
+    async def _perform_gym_search_internal(
+        search_id: str, location: str, radius: float
+    ):
+        """Internal method to perform the actual gym search."""
         import logging
 
         logger = logging.getLogger(__name__)
@@ -744,3 +780,4 @@ class MutationResolvers:
             await search_progress_manager.update_progress(
                 search_id, "error", 0.0, "Search failed", message=str(e)
             )
+            raise  # Re-raise to be caught by timeout handler
