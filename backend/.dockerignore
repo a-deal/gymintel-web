@@ -4,42 +4,40 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 venv/
+env/
 ENV/
-env.bak/
-venv.bak/
+.env
+.env.*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS
-.DS_Store
-Thumbs.db
+# Docs
+docs/
+*.md
 
 # Git
 .git/
 .gitignore
 
-# Documentation
-README.md
-*.md
+# CI
+.github/
 
-# Logs
+# Development
 *.log
-
-# Database
-*.db
 *.sqlite
-
-# Testing
-.coverage
-.pytest_cache/
-htmlcov/
-
-# Docker
-Dockerfile
-.dockerignore
+*.db
+test.db

@@ -1,5 +1,6 @@
 # GymIntel Backend Production Dockerfile
-FROM python:3.11-slim
+# Use a more specific image tag to improve caching
+FROM python:3.11.7-slim-bookworm
 
 # Set working directory
 WORKDIR /app
