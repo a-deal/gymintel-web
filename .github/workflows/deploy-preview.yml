@@ -1,0 +1,108 @@
+name: Deploy Preview to Staging
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'fix/**'
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test.yml
+
+  deploy-backend:
+    name: Deploy Backend Preview to Railway Staging
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway Staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+        run: |
+          cd backend
+          railway link ${{ secrets.RAILWAY_PROJECT_ID_STAGING }}
+          railway up --environment staging --detach
+
+  deploy-frontend:
+    name: Deploy Frontend Preview to Vercel Staging
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy Preview to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGING }}
+        run: |
+          cd frontend
+          vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+          vercel build --token=$VERCEL_TOKEN
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN)
+          echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
+
+  comment-preview:
+    name: Comment Preview URLs
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Get branch name
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Comment deployment URLs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = process.env.BRANCH_NAME;
+            const body = `## 🔍 Preview Deployment
+
+            Branch: \`${branch}\`
+
+            ### Staging URLs:
+            - **Frontend**: https://gymintel-web-staging.vercel.app
+            - **Backend**: https://gymintel-backend-staging.railway.app
+            - **GraphQL Playground**: https://gymintel-backend-staging.railway.app/graphql
+
+            ### Health Checks:
+            - Backend: https://gymintel-backend-staging.railway.app/health
+            - API Docs: https://gymintel-backend-staging.railway.app/docs
+
+            > Note: This is a preview deployment to the staging environment.`;
+
+            // Find the most recent commit
+            const { data: commits } = await github.rest.repos.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              per_page: 1
+            });
+
+            if (commits.length > 0) {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: commits[0].sha,
+                body: body
+              });
+            }

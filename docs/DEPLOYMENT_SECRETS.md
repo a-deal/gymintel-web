@@ -9,14 +9,20 @@ This document lists all the required GitHub secrets for successful deployment of
   - Get it from: https://vercel.com/account/tokens
 - **VERCEL_ORG_ID**: Your Vercel organization ID
   - Find in Vercel project settings
-- **VERCEL_PROJECT_ID**: Your Vercel project ID
+- **VERCEL_PROJECT_ID**: Your Vercel project ID (Production)
   - Find in Vercel project settings
+- **VERCEL_PROJECT_ID_STAGING**: Your Vercel staging project ID
+  - Find in Vercel staging project settings
 
 ### Railway Deployment (Backend)
-- **RAILWAY_TOKEN**: Your Railway API token
+- **RAILWAY_TOKEN**: Your Railway API token (Production)
   - Get it from: https://railway.app/account/tokens
-- **RAILWAY_SERVICE_ID**: Your Railway service ID
+- **RAILWAY_TOKEN_STAGING**: Your Railway API token (Staging)
+  - Get it from: https://railway.app/account/tokens (same token can be used)
+- **RAILWAY_PROJECT_ID**: Your Railway project ID (Production)
   - Find in Railway project settings
+- **RAILWAY_PROJECT_ID_STAGING**: Your Railway staging project ID
+  - Find in Railway staging project settings
 
 ### API Keys
 - **MAPBOX_ACCESS_TOKEN**: Mapbox API key for maps
