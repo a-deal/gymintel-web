@@ -23,6 +23,7 @@ Transform gym discovery from a command-line tool into a powerful web platform wi
 - **Database**: PostgreSQL + PostGIS (geospatial queries)
 - **Maps**: Mapbox GL JS / React Map GL
 - **Deployment**: Railway (backend) + Vercel (frontend)
+- **Environments**: Development + Production with CI/CD
 
 ### **Project Structure**
 ```
