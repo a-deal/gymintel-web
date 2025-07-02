@@ -3,11 +3,14 @@ nixPkgs = ["python311", "postgresql", "gcc"]
 
 [phases.install]
 cmds = [
-    "cd ./backend && python3 -m pip install --upgrade pip && python3 -m pip install -r ./requirements.txt"
+    "ls -la",
+    "ls -la backend/",
+    "python3 -m pip install --upgrade pip",
+    "python3 -m pip install -r backend/requirements.txt"
 ]
 
 [start]
-cmd = "cd ./backend && python3 ./start.py"
+cmd = "python3 backend/start.py"
 
 [variables]
 PYTHONUNBUFFERED = "1"
