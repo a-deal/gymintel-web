@@ -43,7 +43,7 @@ The Google Places API integration provides:
   http://localhost:5173/*
   https://gymintel-web.vercel.app/*
   https://gymintel-web-staging.vercel.app/*
-  https://*.vercel.app/*  (for preview deployments)
+  https://*.vercel.app/* (for preview deployments)
   ```
 
 #### API Restrictions

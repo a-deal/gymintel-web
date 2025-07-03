@@ -271,16 +271,16 @@ class GymResolvers:
                 lat = location_info["latitude"]
                 lon = location_info["longitude"]
 
-                # Find gyms within approximately 10 miles of the city center
-                degree_range = 10 / 69.0
+                # Find gyms within 10 miles of the city center using PostGIS
+                from geoalchemy2 import WKTElement
+                from sqlalchemy import func
+
+                # Create a point for the city center
+                city_point = WKTElement(f"POINT({lon} {lat})", srid=4326)
+                radius_meters = 10 * 1609.34  # 10 miles in meters
 
                 query = select(Gym).where(
-                    and_(
-                        Gym.latitude.between(lat - degree_range, lat + degree_range),
-                        Gym.longitude.between(
-                            lon - degree_range * 1.5, lon + degree_range * 1.5
-                        ),
-                    )
+                    func.ST_DWithin(Gym.location, city_point, radius_meters)
                 )
                 result = await session.execute(query)
                 gyms = result.scalars().all()

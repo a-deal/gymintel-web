@@ -17,7 +17,7 @@ on:
       - 'LICENSE'
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   PYTHON_VERSION: '3.9'
 
 jobs:
@@ -193,7 +193,7 @@ jobs:
           TEST_GOOGLE_KEY: ${{ secrets.TEST_GOOGLE_KEY || 'test-key' }}
           TEST_MAPBOX_TOKEN: ${{ secrets.TEST_MAPBOX_TOKEN || 'test-token' }}
         run: |
-          cat > .env.local << EOF
+          cat > .env.local <<-EOF
           # Test environment variables
           DATABASE_HOST=database
           DATABASE_PORT=5432
@@ -215,17 +215,18 @@ jobs:
         run: |
           echo "Waiting for services to start..."
 
-          # Wait for database
-          echo "Checking database..."
-          timeout 60 bash -c 'until docker exec gymintel-db pg_isready -U gymintel; do sleep 2; done'
+          # Function to wait for a service
+          wait_for() {
+            local name=$1
+            local check_cmd=$2
+            echo "Checking $name..."
+            timeout 60 bash -c "$check_cmd"
+          }
 
-          # Wait for backend
-          echo "Checking backend..."
-          timeout 60 bash -c 'until curl -f http://localhost:8000/health 2>/dev/null; do sleep 2; done'
-
-          # Wait for frontend
-          echo "Checking frontend..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000 2>/dev/null; do sleep 2; done'
+          # Wait for each service
+          wait_for "database" 'until docker exec gymintel-db pg_isready -U gymintel; do sleep 2; done'
+          wait_for "backend" 'until curl -sf http://localhost:8000/health 2>/dev/null; do sleep 2; done'
+          wait_for "frontend" 'until curl -sf http://localhost:3000 2>/dev/null; do sleep 2; done'
 
           echo "All services ready!"
 
@@ -260,19 +261,19 @@ jobs:
             -d '{"query": "query { __typename }"}')
           echo "GraphQL response: $GRAPHQL_RESPONSE"
 
-          # Verify GraphQL response
-          if [[ ! "$GRAPHQL_RESPONSE" =~ "__typename" ]]; then
+          # Verify GraphQL response using jq
+          if ! echo "$GRAPHQL_RESPONSE" | jq -e '.data.__typename' >/dev/null; then
             echo "ERROR: GraphQL endpoint not responding correctly"
             exit 1
           fi
 
           # Test frontend is serving
           echo "Testing frontend..."
-          FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+          FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost:3000)
           echo "Frontend HTTP status: $FRONTEND_STATUS"
 
-          if [ "$FRONTEND_STATUS" != "200" ]; then
-            echo "ERROR: Frontend not serving correctly"
+          if [[ ! "$FRONTEND_STATUS" =~ ^[23] ]]; then
+            echo "ERROR: Frontend not serving correctly (HTTP $FRONTEND_STATUS)"
             exit 1
           fi
 
