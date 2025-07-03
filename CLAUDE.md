@@ -1,6 +1,7 @@
 ## Development Workflow
 - All changes must be done on branches not main, create a pr for each
 - Use python3 instead of python for all local commands
+- Always use docker for local development
 
 ## Current Status (July 2, 2025)
 

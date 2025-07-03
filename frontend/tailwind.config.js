@@ -40,6 +40,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          'GT America Mono',
           'ui-monospace',
           'SFMono-Regular',
           'Monaco',
@@ -49,6 +50,7 @@ module.exports = {
           'monospace',
         ],
         mono: [
+          'GT America Mono',
           'JetBrains Mono',
           'ui-monospace',
           'SFMono-Regular',
@@ -59,14 +61,17 @@ module.exports = {
           'monospace',
         ],
         heading: [
-          'JetBrains Mono',
-          'ui-monospace',
-          'SFMono-Regular',
-          'Monaco',
-          'Consolas',
-          'Liberation Mono',
-          'Courier New',
-          'monospace',
+          'GT America',
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'Noto Sans',
+          'sans-serif',
         ],
       },
       animation: {
