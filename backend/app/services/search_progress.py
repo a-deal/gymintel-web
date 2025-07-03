@@ -5,6 +5,7 @@ Search progress tracking for real-time updates.
 import asyncio
 import json
 import logging
+from contextlib import suppress
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 from uuid import uuid4
@@ -133,8 +134,6 @@ class SearchProgressManager:
 
     def unsubscribe(self, search_id: str, queue: asyncio.Queue):
         """Unsubscribe from search progress updates."""
-        from contextlib import suppress
-
         if search_id in self._subscribers:
             with suppress(ValueError):
                 self._subscribers[search_id].remove(queue)

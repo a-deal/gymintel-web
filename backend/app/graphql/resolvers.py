@@ -215,22 +215,10 @@ class GymResolvers:
             # CLI code disabled until city-based search is supported
             pass
 
-        except Exception:
-            # Return empty result on error
-            return SearchResult(
-                location=location,
-                coordinates=Coordinates(latitude=0.0, longitude=0.0),
-                radius_miles=radius,
-                timestamp=datetime.utcnow(),
-                gyms=[],
-                total_results=0,
-                yelp_results=0,
-                google_results=0,
-                merged_count=0,
-                avg_confidence=0.0,
-                execution_time_seconds=0.0,
-                use_google=True,
-            )
+        except Exception as e:
+            # Re-raise the exception instead of hiding it
+            logger.error(f"Error in search_gyms: {e}")
+            raise
 
     @staticmethod
     async def gym_by_id(gym_id: str) -> Optional[GymType]:
