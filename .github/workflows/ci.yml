@@ -159,12 +159,7 @@ jobs:
           cd backend
           flake8 . --max-line-length=88 --extend-ignore=E203,W503
 
-      - name: Install pytest-xdist for parallel testing
-        run: |
-          cd backend
-          pip install pytest-xdist
-
-      - name: Run backend tests in parallel
+      - name: Run backend tests
         env:
           TEST_DATABASE_HOST: localhost
           TEST_DATABASE_PORT: 5432
@@ -175,9 +170,9 @@ jobs:
         run: |
           cd backend
           if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
-            pytest -n auto --dist loadscope --cov=app --cov-report=xml
+            pytest --cov=app --cov-report=xml
           else
-            pytest -n auto --dist loadscope -x  # Stop on first failure for faster feedback
+            pytest -x  # Stop on first failure for faster feedback
           fi
 
       - name: Upload backend coverage to Codecov
