@@ -60,7 +60,7 @@ class Gym:
     reviews: List[Review]
 
     # Metadata
-    source_zipcode: Optional[str] = None  # Origin ZIP for batch searches
+    source_city: Optional[str] = None  # Origin city for batch searches
     metropolitan_area_code: Optional[str] = None
     created_at: datetime
     updated_at: datetime
@@ -91,7 +91,7 @@ class MetropolitanArea:
     population: Optional[int] = None
     density_category: str  # low, medium, high, very_high
     market_characteristics: List[str]
-    zip_codes: List[str]
+    cities: List[str]  # Cities within this metro area
 
     # Computed fields
     statistics: MetroStatistics
@@ -101,7 +101,7 @@ class MetropolitanArea:
 class SearchResult:
     """Results from gym search operations"""
 
-    zipcode: str
+    location: str  # City name or location searched
     coordinates: Coordinates
     radius_miles: float
     timestamp: datetime
@@ -123,7 +123,7 @@ class SearchResult:
 class GymAnalytics:
     """Advanced analytics for gym market analysis"""
 
-    zipcode: str
+    location: str  # City or area name
     total_gyms: int
     confidence_distribution: str  # JSON histogram
     source_breakdown: str  # JSON source counts
@@ -154,7 +154,7 @@ class SearchProgress:
     current_step: str
     estimated_completion: Optional[datetime] = None
     message: Optional[str] = None
-    location_info: Optional[str] = None  # JSON with city, state, zipcode info
+    location_info: Optional[str] = None  # JSON with city, state info
 
 
 @strawberry.type
@@ -174,7 +174,7 @@ class SavedSearch:
 
     id: strawberry.ID
     user_id: str
-    zipcode: str
+    location: str  # City name
     radius: float
     name: Optional[str] = None
     created_at: datetime
@@ -214,6 +214,16 @@ class SearchFilters:
 
 # Query Root
 @strawberry.type
+class CityAutocomplete:
+    """City autocomplete suggestion"""
+
+    place_id: str
+    description: str
+    main_text: str
+    secondary_text: str
+
+
+@strawberry.type
 class Query:
     """GraphQL query operations"""
 
@@ -226,7 +236,7 @@ class Query:
         filters: Optional[SearchFilters] = None,
     ) -> SearchResult:
         """
-        Search for gyms by location (zipcode or city name).
+        Search for gyms by location (city name).
         If no data exists, automatically fetches from external sources.
         """
         from .resolvers import GymResolvers
@@ -234,6 +244,29 @@ class Query:
         return await GymResolvers.search_gyms_by_location(
             location, radius, limit, filters
         )
+
+    @strawberry.field
+    async def city_autocomplete(
+        self, input_text: str, country: str = "us"
+    ) -> List[CityAutocomplete]:
+        """
+        Get city autocomplete suggestions from Google Places API
+        """
+        from ..services.google_places import google_places_service
+
+        suggestions = await google_places_service.autocomplete_cities(
+            input_text, country
+        )
+
+        return [
+            CityAutocomplete(
+                place_id=s["place_id"],
+                description=s["description"],
+                main_text=s["main_text"],
+                secondary_text=s["secondary_text"],
+            )
+            for s in suggestions
+        ]
 
     @strawberry.field
     async def gym_by_id(self, gym_id: strawberry.ID) -> Optional[Gym]:
@@ -257,20 +290,20 @@ class Query:
         return await MetroResolvers.list_metropolitan_areas()
 
     @strawberry.field
-    async def gym_analytics(self, zipcode: str) -> GymAnalytics:
-        """Get comprehensive analytics for a ZIP code area"""
+    async def gym_analytics(self, location: str) -> GymAnalytics:
+        """Get comprehensive analytics for a city or area"""
         from .resolvers import GymResolvers
 
-        return await GymResolvers.gym_analytics(zipcode)
+        return await GymResolvers.gym_analytics(location)
 
     @strawberry.field
     async def market_gap_analysis(
-        self, zipcode: str, radius: float = 10.0
+        self, location: str, radius: float = 10.0
     ) -> List[MarketGap]:
         """Identify potential market opportunities"""
         from .resolvers import GymResolvers
 
-        return await GymResolvers.market_gap_analysis(zipcode, radius)
+        return await GymResolvers.market_gap_analysis(location, radius)
 
     @strawberry.field
     async def gyms_by_metro(
@@ -289,16 +322,16 @@ class Mutation:
 
     @strawberry.field
     async def import_gym_data(
-        self, zipcode: str, data: List[GymDataInput]
+        self, location: str, data: List[GymDataInput]
     ) -> ImportResult:
         """Import gym data from CLI search results"""
         from .resolvers import MutationResolvers
 
-        return await MutationResolvers.import_gym_data(zipcode, data)
+        return await MutationResolvers.import_gym_data(location, data)
 
     @strawberry.field
     async def save_search(
-        self, user_id: str, zipcode: str, radius: float, name: Optional[str] = None
+        self, user_id: str, location: str, radius: float, name: Optional[str] = None
     ) -> SavedSearch:
         """Save a user's search preferences"""
         # TODO: Implement user search saving
@@ -307,7 +340,7 @@ class Mutation:
         return SavedSearch(
             id=str(uuid.uuid4()),
             user_id=user_id,
-            zipcode=zipcode,
+            location=location,
             radius=radius,
             name=name,
             created_at=datetime.utcnow(),
@@ -317,7 +350,7 @@ class Mutation:
     @strawberry.field
     async def trigger_gym_search(self, location: str, radius: float = 10.0) -> str:
         """
-        Trigger a gym search for a location (city or zipcode).
+        Trigger a gym search for a location (city).
         Returns a search_id to track progress via subscription.
         """
         from .resolvers import MutationResolvers
@@ -331,7 +364,7 @@ class Subscription:
     """GraphQL subscription operations for real-time updates"""
 
     @strawberry.subscription
-    async def gym_updates(self, zipcode: str) -> Gym:
+    async def gym_updates(self, location: str) -> Gym:
         """Subscribe to gym data updates for a specific area"""
         # Real-time gym data changes
         # Placeholder implementation - would connect to real-time data source

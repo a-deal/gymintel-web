@@ -15,6 +15,18 @@ Transform gym discovery from a command-line tool into a powerful web platform wi
 - **GraphQL API**: Flexible, type-safe data access
 - **Real-time Updates**: Live gym data with change notifications
 
+## ✨ Features
+
+- 🔍 **Smart Gym Discovery**: AI-powered gym search with confidence scoring
+- 🗺️ **Interactive Maps**: Visualize gym locations with clustering and density overlays
+- 📊 **Business Intelligence**: Market gap analysis and competitor mapping
+- 🚀 **Real-time Updates**: GraphQL subscriptions for live data
+- 🔄 **CLI Integration**: Seamless bridge to gymintel-cli tool
+- 📈 **Analytics Dashboard**: Comprehensive market insights
+- 🏙️ **City Autocomplete**: Google Places API integration for validated city search
+- 📍 **Location Flexibility**: Search by city name or ZIP code
+- 🎯 **Advanced Filtering**: Filter by rating, confidence, amenities
+
 ## 🏗️ Architecture Overview
 
 ### **Tech Stack**

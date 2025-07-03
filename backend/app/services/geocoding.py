@@ -1,5 +1,5 @@
 """
-Geocoding service for converting cities to zipcodes and coordinates.
+Geocoding service for converting cities to coordinates and location information.
 """
 
 import logging
@@ -10,6 +10,9 @@ from typing import List, Optional, Tuple
 import certifi
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
+
+from ..config import settings
+from .google_places import google_places_service
 
 logger = logging.getLogger(__name__)
 
@@ -30,22 +33,44 @@ class GeocodingService:
             user_agent="gymintel-web/1.0", timeout=timeout, ssl_context=ctx
         )
 
-    async def search_location(self, query: str) -> Tuple[Optional[str], Optional[dict]]:
+    async def search_location(self, query: str) -> Optional[dict]:
         """
-        Search for a location by city name or zipcode.
+        Search for a location by city name.
 
         Args:
-            query: City name or zipcode
+            query: City name
 
         Returns:
-            Tuple of (zipcode, location_info)
+            Dict with location info including coordinates, city, state, etc.
         """
-        # Check if query is a zipcode
+        # Check if query is a zipcode (for backward compatibility)
         if self._is_zipcode(query):
-            return query, await self._get_location_from_zipcode(query)
+            return await self._get_location_from_zipcode(query)
 
-        # Otherwise, try to find city
-        return await self._get_zipcode_from_city(query)
+        # If Google Places API is configured, try it first for city validation
+        if settings.google_places_api_key:
+            try:
+                is_valid, place_details = (
+                    await google_places_service.validate_city_input(query)
+                )
+                if is_valid and place_details:
+                    logger.info(f"Google Places validated city: {place_details.name}")
+                    return {
+                        "latitude": place_details.latitude,
+                        "longitude": place_details.longitude,
+                        "display_name": place_details.formatted_address,
+                        "city": place_details.locality or place_details.name,
+                        "state": place_details.administrative_area_level_1,
+                        "google_place_id": place_details.place_id,
+                        "postal_code": place_details.postal_code,
+                    }
+            except Exception as e:
+                logger.error(f"Google Places API error: {e}")
+                # Fall back to Nominatim
+
+        # Otherwise, try to find city using Nominatim
+        _, location_info = await self._get_zipcode_from_city(query)
+        return location_info
 
     def _is_zipcode(self, query: str) -> bool:
         """Check if the query is a US zipcode."""

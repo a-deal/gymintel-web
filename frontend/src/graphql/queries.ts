@@ -33,7 +33,7 @@ export const GYM_FRAGMENT = gql`
       source
       lastUpdated
     }
-    sourceZipcode
+    sourceCity
     metropolitanAreaCode
     createdAt
     updatedAt
@@ -44,18 +44,18 @@ export const GYM_FRAGMENT = gql`
 export const SEARCH_GYMS = gql`
   ${GYM_FRAGMENT}
   query SearchGyms(
-    $zipcode: String!
+    $location: String!
     $radius: Float = 10.0
     $limit: Int = 50
     $filters: SearchFilters
   ) {
     searchGyms(
-      zipcode: $zipcode
+      location: $location
       radius: $radius
       limit: $limit
       filters: $filters
     ) {
-      zipcode
+      location
       coordinates {
         latitude
         longitude
@@ -140,9 +140,9 @@ export const LIST_METROPOLITAN_AREAS = gql`
 
 // Get gym analytics
 export const GET_GYM_ANALYTICS = gql`
-  query GetGymAnalytics($zipcode: String!) {
-    gymAnalytics(zipcode: $zipcode) {
-      zipcode
+  query GetGymAnalytics($location: String!) {
+    gymAnalytics(location: $location) {
+      location
       totalGyms
       confidenceDistribution
       sourceBreakdown
@@ -155,8 +155,8 @@ export const GET_GYM_ANALYTICS = gql`
 
 // Market gap analysis
 export const MARKET_GAP_ANALYSIS = gql`
-  query MarketGapAnalysis($zipcode: String!, $radius: Float = 10.0) {
-    marketGapAnalysis(zipcode: $zipcode, radius: $radius) {
+  query MarketGapAnalysis($location: String!, $radius: Float = 10.0) {
+    marketGapAnalysis(location: $location, radius: $radius) {
       areaDescription
       coordinates {
         latitude
@@ -176,6 +176,18 @@ export const GET_GYMS_BY_METRO = gql`
   query GetGymsByMetro($metroCode: String!, $limit: Int = 100, $offset: Int = 0) {
     gymsByMetro(metroCode: $metroCode, limit: $limit, offset: $offset) {
       ...GymFragment
+    }
+  }
+`;
+
+// City autocomplete for search input
+export const CITY_AUTOCOMPLETE = gql`
+  query CityAutocomplete($inputText: String!, $country: String = "us") {
+    cityAutocomplete(inputText: $inputText, country: $country) {
+      placeId
+      description
+      mainText
+      secondaryText
     }
   }
 `;

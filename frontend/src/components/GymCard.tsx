@@ -172,9 +172,9 @@ export const GymCard = ({ gym, onClick }: GymCardProps) => {
           Updated {new Date(gym.updatedAt).toLocaleDateString()}
         </div>
 
-        {gym.sourceZipcode && (
+        {gym.sourceCity && (
           <span className="text-xs text-gray-500">
-            Source: {gym.sourceZipcode}
+            Source: {gym.sourceCity}
           </span>
         )}
       </div>

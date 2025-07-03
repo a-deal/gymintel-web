@@ -6,8 +6,8 @@ import { gql } from '@apollo/client';
 
 // Import gym data mutation
 export const IMPORT_GYM_DATA = gql`
-  mutation ImportGymData($zipcode: String!, $data: [GymDataInput!]!) {
-    importGymData(zipcode: $zipcode, data: $data) {
+  mutation ImportGymData($location: String!, $data: [GymDataInput!]!) {
+    importGymData(location: $location, data: $data) {
       success
       gymsImported
       gymsUpdated
@@ -21,19 +21,19 @@ export const IMPORT_GYM_DATA = gql`
 export const SAVE_SEARCH = gql`
   mutation SaveSearch(
     $userId: String!
-    $zipcode: String!
+    $location: String!
     $radius: Float!
     $name: String
   ) {
     saveSearch(
       userId: $userId
-      zipcode: $zipcode
+      location: $location
       radius: $radius
       name: $name
     ) {
       id
       userId
-      zipcode
+      location
       radius
       name
       createdAt
@@ -44,7 +44,14 @@ export const SAVE_SEARCH = gql`
 
 // Trigger CLI import
 export const TRIGGER_CLI_IMPORT = gql`
-  mutation TriggerCliImport($zipcode: String!, $radius: Float = 10.0) {
-    triggerCliImport(zipcode: $zipcode, radius: $radius)
+  mutation TriggerCliImport($location: String!, $radius: Float = 10.0) {
+    triggerCliImport(location: $location, radius: $radius)
+  }
+`;
+
+// Trigger gym search
+export const TRIGGER_GYM_SEARCH = gql`
+  mutation TriggerGymSearch($location: String!, $radius: Float = 10.0) {
+    triggerGymSearch(location: $location, radius: $radius)
   }
 `;
