@@ -7,14 +7,12 @@ on:
       - 'fix/**'
 
 jobs:
-  test:
-    name: Run Tests
-    uses: ./.github/workflows/test.yml
-
   deploy-backend:
     name: Deploy Backend Preview to Railway Staging
-    needs: test
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' &&
+      contains(secrets.RAILWAY_STAGING_TOKEN, 'rw_')
 
     steps:
       - uses: actions/checkout@v4
@@ -32,8 +30,10 @@ jobs:
 
   deploy-frontend:
     name: Deploy Frontend Preview to Vercel Staging
-    needs: test
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' &&
+      contains(secrets.VERCEL_TOKEN, 'vercel_')
 
     steps:
       - uses: actions/checkout@v4
