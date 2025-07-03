@@ -84,24 +84,21 @@ jobs:
       - name: Run ESLint
         run: |
           cd frontend
-          npm run lint || echo "ESLint failed but continuing..."
-        continue-on-error: true
+          npm run lint
 
       - name: Run TypeScript type check
         run: |
           cd frontend
-          npm run type-check || echo "TypeScript check failed but continuing..."
-        continue-on-error: true
+          npm run type-check
 
       - name: Run frontend tests
         run: |
           cd frontend
           if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
-            npm run test -- --coverage || echo "Tests failed but continuing..."
+            npm run test -- --coverage
           else
-            npm run test || echo "Tests failed but continuing..."
+            npm run test
           fi
-        continue-on-error: true
 
       - name: Upload frontend coverage to Codecov
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -146,17 +143,17 @@ jobs:
       - name: Install backend dependencies
         run: |
           cd backend
-          pip install --no-compile --no-warn-script-location -r requirements.txt
+          pip install --no-compile --no-warn-script-location --no-cache-dir -r requirements.txt
 
-      - name: Run code formatting with Black
+      - name: Check code formatting with Black
         run: |
           cd backend
-          black .
+          black --check --diff .
 
-      - name: Run import sorting with isort
+      - name: Check import sorting with isort
         run: |
           cd backend
-          isort .
+          isort --check-only --diff .
 
       - name: Run linting (flake8)
         run: |
@@ -229,7 +226,7 @@ jobs:
           cache-to: |
             type=inline
             type=gha,mode=max
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
   integration-tests:
     name: Integration Tests
@@ -341,7 +338,7 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     # Run in parallel with other jobs
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
