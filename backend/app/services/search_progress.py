@@ -22,6 +22,22 @@ class SearchProgressManager:
         """Initialize the search progress manager."""
         # In-memory storage for progress updates
         # In production, this would use Redis or similar
+        #
+        # TODO: Redis implementation for production:
+        # 1. Use Redis pub/sub for real-time updates across instances
+        # 2. Store search progress in Redis with TTL (e.g., 1 hour)
+        # 3. Implement connection pooling and automatic reconnection
+        # 4. Use Redis Streams or pub/sub for subscriber management
+        #
+        # Example Redis data structure:
+        # - search:progress:{search_id} -> Hash with progress data
+        # - search:subscribers:{search_id} -> Set of active subscribers
+        # - Pub/sub channel: search.updates.{search_id}
+        #
+        # Benefits:
+        # - Horizontal scaling across multiple backend instances
+        # - Persistent progress tracking if backend restarts
+        # - Automatic cleanup with Redis TTL
         self._searches: Dict[str, Dict] = {}
         self._subscribers: Dict[str, list] = {}
 

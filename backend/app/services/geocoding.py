@@ -33,6 +33,15 @@ class GeocodingService:
             user_agent="gymintel-web/1.0", timeout=timeout, ssl_context=ctx
         )
 
+        # TODO: Make country codes configurable for international support
+        # Currently hardcoded to US only in search methods
+        # Future enhancement:
+        # 1. Add country_codes parameter to __init__ (default: ["us"])
+        # 2. Store as instance variable: self.country_codes
+        # 3. Update search_location to use self.country_codes
+        # 4. Make country suffix dynamic based on country_codes
+        # 5. Support multiple countries for global gym search
+
     async def search_location(self, query: str) -> Optional[dict]:
         """
         Search for a location by city name.
