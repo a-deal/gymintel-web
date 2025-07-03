@@ -38,7 +38,7 @@ The Google Places API integration provides:
 #### Application Restrictions
 - **HTTP referrers (web sites)** for frontend-only usage
 - Add allowed referrers:
-  ```
+  ```text
   http://localhost:3000/*
   http://localhost:5173/*
   https://gymintel-web.vercel.app/*

@@ -5,7 +5,17 @@ User and saved search database models
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    String,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -92,6 +102,20 @@ class SavedSearch(Base):
 
     # Relationships
     user = relationship("User", back_populates="saved_searches")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "resolved_latitude IS NULL OR "
+            "(resolved_latitude >= -90 AND resolved_latitude <= 90)",
+            name="valid_latitude",
+        ),
+        CheckConstraint(
+            "resolved_longitude IS NULL OR "
+            "(resolved_longitude >= -180 AND resolved_longitude <= 180)",
+            name="valid_longitude",
+        ),
+    )
 
     def __repr__(self):
         return f"<SavedSearch(name='{self.name}', location='{self.location}')>"

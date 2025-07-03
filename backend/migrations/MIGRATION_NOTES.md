@@ -70,13 +70,13 @@ python3 -m alembic history
 
 ## Rollback Instructions
 
-To rollback all migrations:
+To roll back all migrations:
 
 ```bash
 python3 -m alembic downgrade 001
 ```
 
-To rollback one migration at a time:
+To roll back one migration at a time:
 
 ```bash
 python3 -m alembic downgrade -1

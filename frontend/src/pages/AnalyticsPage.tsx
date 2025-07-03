@@ -108,7 +108,6 @@ export const AnalyticsPage = () => {
                   }
                 }}
                 placeholder="Enter city name for analytics"
-                loading={analyticsLoading}
               />
             </div>
             <button

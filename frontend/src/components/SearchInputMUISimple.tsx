@@ -25,7 +25,6 @@ interface SearchInputMUISimpleProps {
   onChange: (value: string) => void;
   onSubmit: () => void;
   placeholder?: string;
-  loading?: boolean;
   autoFocus?: boolean;
   className?: string;
 }
@@ -53,7 +52,6 @@ export const SearchInputMUISimple: React.FC<SearchInputMUISimpleProps> = ({
   onChange,
   onSubmit,
   placeholder = "Enter city name",
-  loading: _loading = false,
   autoFocus = false,
   className = "",
 }) => {

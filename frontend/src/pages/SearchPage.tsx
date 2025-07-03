@@ -105,7 +105,6 @@ export const SearchPage = () => {
                 }
               }}
               placeholder="Enter city name"
-              loading={loading}
             />
           </div>
           <div className="w-32">
