@@ -28,6 +28,12 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_STAGING_TOKEN }}
+          DATABASE_HOST: ${{ secrets.STAGING_DB_HOST }}
+          DATABASE_NAME: ${{ secrets.STAGING_DB_NAME }}
+          DATABASE_USER: ${{ secrets.STAGING_DB_USER }}
+          DATABASE_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          YELP_API_KEY: ${{ secrets.STAGING_YELP_API_KEY }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.STAGING_GOOGLE_PLACES_API_KEY }}
         run: |
           cp backend/railway.staging.toml railway.toml
           railway link ${{ secrets.RAILWAY_STAGING_PROJECT_ID }}
@@ -57,10 +63,14 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID }}
+          VITE_GRAPHQL_ENDPOINT: ${{ secrets.STAGING_GRAPHQL_ENDPOINT }}
+          VITE_MAPBOX_ACCESS_TOKEN: ${{ secrets.STAGING_MAPBOX_TOKEN }}
         run: |
           cd frontend
           vercel pull --yes --environment=staging --token=$VERCEL_TOKEN
-          vercel build --token=$VERCEL_TOKEN
+          vercel build --token=$VERCEL_TOKEN \
+            --env VITE_GRAPHQL_ENDPOINT=$VITE_GRAPHQL_ENDPOINT \
+            --env VITE_MAPBOX_ACCESS_TOKEN=$VITE_MAPBOX_ACCESS_TOKEN
           vercel deploy --prebuilt --token=$VERCEL_TOKEN --env=staging
 
   preview-deployment:
