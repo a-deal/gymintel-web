@@ -6,19 +6,20 @@ import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLazyQuery } from '@apollo/client';
 import { SEARCH_GYMS } from '../graphql/queries';
+import { SearchInputMUISimple } from '../components/SearchInputMUISimple';
 import { MagnifyingGlassIcon, MapPinIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 export const HomePage = () => {
-  const [zipcode, setZipcode] = useState('');
+  const [location, setLocation] = useState('');
   const navigate = useNavigate();
-  const [, { loading }] = useLazyQuery(SEARCH_GYMS);
+  const [_searchGyms] = useLazyQuery(SEARCH_GYMS);
 
   const handleQuickSearch = async (e: FormEvent) => {
     e.preventDefault();
-    if (!zipcode.trim()) return;
+    if (!location.trim()) return;
 
-    // Navigate to search page with zipcode
-    navigate(`/search?zipcode=${zipcode}`);
+    // Navigate to search page with location
+    navigate(`/search?location=${encodeURIComponent(location)}`);
   };
 
   const features = [
@@ -65,25 +66,19 @@ export const HomePage = () => {
 
             {/* Quick Search */}
             <div className="max-w-md mx-auto">
-              <form onSubmit={handleQuickSearch} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter ZIP code to start..."
-                  value={zipcode}
-                  onChange={(e) => setZipcode(e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 border-0 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              <form onSubmit={handleQuickSearch} className="relative">
+                <SearchInputMUISimple
+                  value={location}
+                  onChange={setLocation}
+                  onSubmit={() => {
+                    if (location.trim()) {
+                      navigate(`/search?location=${encodeURIComponent(location)}`);
+                    }
+                  }}
+                  placeholder="Enter city to start..."
+                  autoFocus
+                  className="bg-white text-gray-900 placeholder-gray-500 border-0 focus:ring-2 focus:ring-blue-300 focus:border-transparent"
                 />
-                <button
-                  type="submit"
-                  disabled={loading || !zipcode.trim()}
-                  className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <MagnifyingGlassIcon className="w-5 h-5" />
-                  )}
-                </button>
               </form>
               <p className="text-blue-200 text-sm mt-2">
                 Search gyms with intelligent confidence scoring

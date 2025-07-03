@@ -17,7 +17,7 @@ on:
       - 'LICENSE'
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   PYTHON_VERSION: '3.9'
 
 jobs:
@@ -186,50 +186,102 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file
+      - name: Create .env.local file
         env:
           TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD || 'testpass' }}
           TEST_YELP_KEY: ${{ secrets.TEST_YELP_KEY || 'test-key' }}
           TEST_GOOGLE_KEY: ${{ secrets.TEST_GOOGLE_KEY || 'test-key' }}
           TEST_MAPBOX_TOKEN: ${{ secrets.TEST_MAPBOX_TOKEN || 'test-token' }}
         run: |
-          cat > .env << EOF
+          cat > .env.local <<-EOF
           # Test environment variables
           DATABASE_HOST=database
           DATABASE_PORT=5432
           DATABASE_NAME=gymintel
-          DATABASE_USER=postgres
+          DATABASE_USER=gymintel
           DATABASE_PASSWORD=${TEST_DB_PASSWORD}
           YELP_API_KEY=${TEST_YELP_KEY}
           GOOGLE_PLACES_API_KEY=${TEST_GOOGLE_KEY}
           MAPBOX_ACCESS_TOKEN=${TEST_MAPBOX_TOKEN}
           ENVIRONMENT=testing
+          AUTO_INIT_DB=true
+          SEED_DATABASE=false
           EOF
 
       - name: Start services with Docker Compose
-        run: docker compose -f docker/docker-compose.yml up -d --build
+        run: docker compose -f docker/docker-compose.ci.yml up -d --build
 
       - name: Wait for services to be ready
         run: |
           echo "Waiting for services to start..."
-          sleep 30
 
-          # Check backend health
-          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:8000/health
+          # Function to wait for a service
+          wait_for() {
+            local name=$1
+            local check_cmd=$2
+            echo "Checking $name..."
+            timeout 60 bash -c "$check_cmd"
+          }
+
+          # Wait for each service
+          wait_for "database" 'until docker exec gymintel-db pg_isready -U gymintel; do sleep 2; done'
+          wait_for "backend" 'until curl -sf http://localhost:8000/health 2>/dev/null; do sleep 2; done'
+          wait_for "frontend" 'until curl -sf http://localhost:3000 2>/dev/null; do sleep 2; done'
+
+          echo "All services ready!"
+
+      - name: Check service logs if startup fails
+        if: failure()
+        run: |
+          echo "=== Docker Compose Status ==="
+          docker compose -f docker/docker-compose.ci.yml ps
+
+          echo "=== Backend Logs ==="
+          docker compose -f docker/docker-compose.ci.yml logs backend --tail=50
+
+          echo "=== Database Logs ==="
+          docker compose -f docker/docker-compose.ci.yml logs database --tail=50
+
+          echo "=== Frontend Logs ==="
+          docker compose -f docker/docker-compose.ci.yml logs frontend --tail=50
 
       - name: Run integration tests
         run: |
+          set -e
+
+          # Test backend health endpoint
+          echo "Testing backend health endpoint..."
+          HEALTH_RESPONSE=$(curl -s http://localhost:8000/health)
+          echo "Health response: $HEALTH_RESPONSE"
+
           # Test GraphQL endpoint
-          curl -X POST http://localhost:8000/graphql \
+          echo "Testing GraphQL endpoint..."
+          GRAPHQL_RESPONSE=$(curl -s -X POST http://localhost:8000/graphql \
             -H "Content-Type: application/json" \
-            -d '{"query": "query { __typename }"}'
+            -d '{"query": "query { __typename }"}')
+          echo "GraphQL response: $GRAPHQL_RESPONSE"
+
+          # Verify GraphQL response using jq
+          if ! echo "$GRAPHQL_RESPONSE" | jq -e '.data.__typename' >/dev/null; then
+            echo "ERROR: GraphQL endpoint not responding correctly"
+            exit 1
+          fi
 
           # Test frontend is serving
-          curl -f http://localhost:3000
+          echo "Testing frontend..."
+          FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost:3000)
+          echo "Frontend HTTP status: $FRONTEND_STATUS"
+
+          if [[ ! "$FRONTEND_STATUS" =~ ^[23] ]]; then
+            echo "ERROR: Frontend not serving correctly (HTTP $FRONTEND_STATUS)"
+            exit 1
+          fi
+
+          echo "All integration tests passed!"
 
       - name: Cleanup
         if: always()
-        run: docker compose -f docker/docker-compose.yml down -v
+        run: docker compose -f docker/docker-compose.ci.yml down -v
 
   security-scan:
     name: Security Scan

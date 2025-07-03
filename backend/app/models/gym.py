@@ -46,9 +46,9 @@ class Gym(Base):
     review_count = Column(Integer, nullable=True, default=0)
 
     # Metadata
-    source_zipcode = Column(
-        String(10), nullable=True, index=True
-    )  # Origin ZIP for batch searches
+    source_city = Column(
+        String(255), nullable=True, index=True
+    )  # Origin city for batch searches
     metropolitan_area_code = Column(String(20), nullable=True, index=True)
     raw_data = Column(JSON, nullable=True)  # Store original API responses
 

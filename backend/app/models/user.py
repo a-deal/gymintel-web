@@ -5,7 +5,17 @@ User and saved search database models
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    String,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -62,8 +72,12 @@ class SavedSearch(Base):
 
     # Search parameters
     name = Column(String(100), nullable=False)  # User-defined name
-    zipcode = Column(String(10), nullable=False, index=True)
+    location = Column(String(100), nullable=False, index=True)  # City name or zipcode
     radius = Column(String(20), nullable=False, default="25")  # miles
+
+    # Resolved location coordinates (cached from geocoding)
+    resolved_latitude = Column(Float, nullable=True)
+    resolved_longitude = Column(Float, nullable=True)
 
     # Filters (stored as JSON)
     filters = Column(JSON, nullable=True)  # rating, price range, amenities, etc.
@@ -89,5 +103,19 @@ class SavedSearch(Base):
     # Relationships
     user = relationship("User", back_populates="saved_searches")
 
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "resolved_latitude IS NULL OR "
+            "(resolved_latitude >= -90 AND resolved_latitude <= 90)",
+            name="valid_latitude",
+        ),
+        CheckConstraint(
+            "resolved_longitude IS NULL OR "
+            "(resolved_longitude >= -180 AND resolved_longitude <= 180)",
+            name="valid_longitude",
+        ),
+    )
+
     def __repr__(self):
-        return f"<SavedSearch(name='{self.name}', zipcode='{self.zipcode}')>"
+        return f"<SavedSearch(name='{self.name}', location='{self.location}')>"

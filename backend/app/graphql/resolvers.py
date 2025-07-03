@@ -11,7 +11,10 @@ from sqlalchemy.orm import selectinload
 
 from ..database import get_db_session
 from ..models.gym import DataSource, Gym
+from ..services.city_boundaries import CityBoundaryService
 from ..services.cli_bridge import cli_bridge_service
+from ..services.geocoding import geocoding_service
+from ..services.search_progress import search_progress_manager
 from .schema import Coordinates
 from .schema import DataSource as DataSourceType
 from .schema import Gym as GymType
@@ -24,53 +27,124 @@ class GymResolvers:
     """Resolvers for Gym-related GraphQL operations"""
 
     @staticmethod
-    async def search_gyms(
-        zipcode: str,
+    async def search_gyms_by_location(
+        location: str,
         radius: float = 10.0,
         limit: int = 50,
         filters: Optional[SearchFilters] = None,
     ) -> SearchResult:
         """Search for gyms in a specific area"""
+        import logging
 
-        # First, try to get from database
+        logger = logging.getLogger(__name__)
+        logger.info(f"Searching for gyms in location: {location}")
+
+        # Initialize city boundary service
+        city_boundary_service = CityBoundaryService(geocoding_service)
+
+        # Get location information (city coordinates, boundaries, etc.)
+        location_info = await geocoding_service.search_location(location)
+        logger.info(f"Geocoding result - location_info: {location_info}")
+
+        if not location_info:
+            # Could not geocode the location
+            raise Exception(f"Could not find location: {location}")
+
+        # Location is passed as parameter to this function
+
+        # First, try to get from database using city boundary service
         async with get_db_session() as session:
             # Build base query
             query = select(Gym).options(
                 selectinload(Gym.sources), selectinload(Gym.reviews)
             )
 
-            # Apply zipcode filter if we have existing data
-            if zipcode:
-                query = query.where(Gym.source_zipcode == zipcode)
+            # Use city boundary service to find gyms
+            existing_gyms = []  # Initialize to empty list
 
-            # Apply additional filters
-            if filters:
-                if filters.min_rating and filters.min_rating > 0:
-                    query = query.where(Gym.rating >= filters.min_rating)
-                if filters.min_confidence and filters.min_confidence > 0:
-                    query = query.where(Gym.confidence >= filters.min_confidence)
-                if filters.has_website is not None:
-                    if filters.has_website:
-                        query = query.where(Gym.website.isnot(None))
-                    else:
-                        query = query.where(Gym.website.is_(None))
-                if filters.has_instagram is not None:
-                    if filters.has_instagram:
-                        query = query.where(Gym.instagram.isnot(None))
-                    else:
-                        query = query.where(Gym.instagram.is_(None))
+            # Extract state from location_info if available
+            state = None
+            if location_info:
+                # Try to extract state from geocoding result
+                if "state" in location_info:
+                    state = location_info["state"]
+                elif "address_components" in location_info:
+                    # Look for state in address components (common in geocoding results)
+                    for component in location_info.get("address_components", []):
+                        if "administrative_area_level_1" in component.get("types", []):
+                            state = component.get("short_name")
+                            break
 
-            query = query.limit(limit)
-            result = await session.execute(query)
-            existing_gyms = result.scalars().all()
+            # Use city boundary service to find gyms
+            try:
+                gym_results = await city_boundary_service.find_gyms_in_city(
+                    session, city_name=location, state=state, limit=limit
+                )
+                logger.info(f"Found {len(gym_results)} gyms for {location}")
+
+                # Convert city boundary service results to Gym objects
+                if gym_results:
+                    # Get the gym IDs from results
+                    gym_ids = [result["id"] for result in gym_results]
+
+                    # Query to get full Gym objects with relationships
+                    query = (
+                        select(Gym)
+                        .options(selectinload(Gym.sources), selectinload(Gym.reviews))
+                        .where(Gym.id.in_(gym_ids))
+                    )
+
+                    # Apply additional filters before executing
+                    if filters:
+                        if filters.min_rating and filters.min_rating > 0:
+                            query = query.where(Gym.rating >= filters.min_rating)
+                        if filters.min_confidence and filters.min_confidence > 0:
+                            query = query.where(
+                                Gym.confidence >= filters.min_confidence
+                            )
+                        if filters.has_website is not None:
+                            if filters.has_website:
+                                query = query.where(Gym.website.isnot(None))
+                            else:
+                                query = query.where(Gym.website.is_(None))
+                        if filters.has_instagram is not None:
+                            if filters.has_instagram:
+                                query = query.where(Gym.instagram.isnot(None))
+                            else:
+                                query = query.where(Gym.instagram.is_(None))
+
+                    result = await session.execute(query)
+                    existing_gyms = result.scalars().all()
+
+                    # Sort gyms by their original order from city boundary service
+                    gym_order = {gym_id: idx for idx, gym_id in enumerate(gym_ids)}
+                    existing_gyms.sort(
+                        key=lambda gym: gym_order.get(str(gym.id), float("inf"))
+                    )
+
+                    logger.info(f"After filtering, returning {len(existing_gyms)} gyms")
+                else:
+                    logger.info("No gyms found by city boundary service")
+                    existing_gyms = []
+            except Exception as e:
+                logger.error(f"Error using city boundary service: {e}")
+                existing_gyms = []
 
             # If we have recent data, return it
             if existing_gyms:
                 return SearchResult(
-                    zipcode=zipcode,
+                    location=location,
                     coordinates=Coordinates(
-                        latitude=existing_gyms[0].latitude if existing_gyms else 0.0,
-                        longitude=existing_gyms[0].longitude if existing_gyms else 0.0,
+                        latitude=(
+                            location_info.get("latitude", existing_gyms[0].latitude)
+                            if location_info
+                            else existing_gyms[0].latitude
+                        ),
+                        longitude=(
+                            location_info.get("longitude", existing_gyms[0].longitude)
+                            if location_info
+                            else existing_gyms[0].longitude
+                        ),
                     ),
                     radius_miles=radius,
                     timestamp=datetime.utcnow(),
@@ -101,86 +175,19 @@ class GymResolvers:
 
         # If no existing data, fetch from CLI
         try:
-            cli_result = await cli_bridge_service.search_gyms_via_cli(
-                zipcode=zipcode, radius=radius, use_google=True
-            )
-
-            # Store results in database
-            await GymResolvers._store_cli_results(cli_result)
-
-            # Transform to GraphQL format
-            search_info = cli_result["search_info"]
-            gyms_data = cli_result["gyms"]
-
-            gyms = []
-            for gym_data in gyms_data:
-                gym = GymType(
-                    id=str(
-                        gym_data.get(
-                            "id", f"cli-{hash(gym_data['name'] + gym_data['address'])}"
-                        )
-                    ),
-                    name=gym_data["name"],
-                    address=gym_data["address"],
-                    coordinates=Coordinates(
-                        latitude=gym_data["latitude"], longitude=gym_data["longitude"]
-                    ),
-                    phone=gym_data.get("phone"),
-                    website=gym_data.get("website"),
-                    instagram=gym_data.get("instagram"),
-                    confidence=gym_data["confidence"],
-                    match_confidence=gym_data["confidence"],
-                    rating=gym_data.get("rating"),
-                    review_count=gym_data.get("review_count", 0),
-                    sources=[
-                        DataSourceType(
-                            name=source["name"],
-                            confidence=source["confidence"],
-                            last_updated=datetime.fromisoformat(
-                                source["last_updated"].replace("Z", "+00:00")
-                            ),
-                        )
-                        for source in gym_data.get("sources", [])
-                    ],
-                    reviews=[],
-                    source_zipcode=gym_data.get("source_zipcode"),
-                    metropolitan_area_code=gym_data.get("metropolitan_area_code"),
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow(),
-                )
-                gyms.append(gym)
-
+            # For now, return empty result as CLI expects zipcode
+            # TODO: Update CLI to support city-based search
+            logger.warning(f"CLI search not yet supported for city: {location}")
             return SearchResult(
-                zipcode=search_info["zipcode"],
+                location=location,
                 coordinates=Coordinates(
-                    latitude=search_info["coordinates"].get("latitude", 0.0),
-                    longitude=search_info["coordinates"].get("longitude", 0.0),
+                    latitude=(
+                        location_info.get("latitude", 0.0) if location_info else 0.0
+                    ),
+                    longitude=(
+                        location_info.get("longitude", 0.0) if location_info else 0.0
+                    ),
                 ),
-                radius_miles=search_info["radius_miles"],
-                timestamp=(
-                    datetime.fromisoformat(search_info["timestamp"])
-                    if search_info.get("timestamp")
-                    else datetime.utcnow()
-                ),
-                gyms=gyms,
-                total_results=search_info["total_results"],
-                yelp_results=search_info["yelp_results"],
-                google_results=search_info["google_results"],
-                merged_count=search_info["merged_count"],
-                avg_confidence=(
-                    float(search_info["avg_confidence"].replace("%", "")) / 100.0
-                    if isinstance(search_info["avg_confidence"], str)
-                    else search_info["avg_confidence"]
-                ),
-                execution_time_seconds=2.0,  # Estimated CLI execution time
-                use_google=search_info["use_google"],
-            )
-
-        except Exception:
-            # Return empty result on error
-            return SearchResult(
-                zipcode=zipcode,
-                coordinates=Coordinates(latitude=0.0, longitude=0.0),
                 radius_miles=radius,
                 timestamp=datetime.utcnow(),
                 gyms=[],
@@ -192,6 +199,26 @@ class GymResolvers:
                 execution_time_seconds=0.0,
                 use_google=True,
             )
+
+            # Original CLI call code (disabled for now)
+            # cli_result = await cli_bridge_service.search_gyms_via_cli(
+            #     zipcode=search_zipcode, radius=radius, use_google=True
+            # )
+
+            # Store results in database when CLI is available
+            # await GymResolvers._store_cli_results(cli_result)
+
+            # Transform to GraphQL format when CLI is available
+            # search_info = cli_result["search_info"]
+            # gyms_data = cli_result["gyms"]
+
+            # CLI code disabled until city-based search is supported
+            pass
+
+        except Exception as e:
+            # Re-raise the exception instead of hiding it
+            logger.error(f"Error in search_gyms: {e}")
+            raise
 
     @staticmethod
     async def gym_by_id(gym_id: str) -> Optional[GymType]:
@@ -230,16 +257,39 @@ class GymResolvers:
             return [GymResolvers._gym_to_graphql(gym) for gym in gyms]
 
     @staticmethod
-    async def gym_analytics(zipcode: str) -> GymAnalytics:
-        """Get comprehensive analytics for a ZIP code area"""
+    async def gym_analytics(location: str) -> GymAnalytics:
+        """Get comprehensive analytics for a city or area"""
+        # Get location information to find gyms by coordinates
+        location_info = await geocoding_service.search_location(location)
+
         async with get_db_session() as session:
-            query = select(Gym).where(Gym.source_zipcode == zipcode)
-            result = await session.execute(query)
-            gyms = result.scalars().all()
+            if (
+                location_info
+                and "latitude" in location_info
+                and "longitude" in location_info
+            ):
+                lat = location_info["latitude"]
+                lon = location_info["longitude"]
+
+                # Find gyms within 10 miles of the city center using PostGIS
+                from geoalchemy2 import WKTElement
+                from sqlalchemy import func
+
+                # Create a point for the city center
+                city_point = WKTElement(f"POINT({lon} {lat})", srid=4326)
+                radius_meters = 10 * 1609.34  # 10 miles in meters
+
+                query = select(Gym).where(
+                    func.ST_DWithin(Gym.location, city_point, radius_meters)
+                )
+                result = await session.execute(query)
+                gyms = result.scalars().all()
+            else:
+                gyms = []
 
             if not gyms:
                 return GymAnalytics(
-                    zipcode=zipcode,
+                    location=location,
                     total_gyms=0,
                     confidence_distribution="{}",
                     source_breakdown="{}",
@@ -288,7 +338,7 @@ class GymResolvers:
             }
 
             return GymAnalytics(
-                zipcode=zipcode,
+                location=location,
                 total_gyms=total_gyms,
                 confidence_distribution=json.dumps(confidence_hist),
                 source_breakdown=json.dumps(source_counts),
@@ -303,14 +353,14 @@ class GymResolvers:
 
     @staticmethod
     async def market_gap_analysis(
-        zipcode: str, radius: float = 10.0
+        location: str, radius: float = 10.0
     ) -> List[MarketGap]:
         """Identify potential market opportunities"""
         # This is a simplified implementation
         # In a real app, this would use sophisticated geospatial analysis
         return [
             MarketGap(
-                area_description=f"Underserved area near {zipcode}",
+                area_description=f"Underserved area near {location}",
                 coordinates=Coordinates(latitude=40.7128, longitude=-74.0060),
                 gap_score=0.75,
                 population_density=1500.0,
@@ -322,7 +372,7 @@ class GymResolvers:
         ]
 
     @staticmethod
-    async def _store_cli_results(cli_result: dict):
+    async def _store_cli_results(cli_result: dict, location: str = "Unknown"):
         """Store CLI search results in database"""
         async with get_db_session() as session:
             gyms_data = cli_result.get("gyms", [])
@@ -368,7 +418,7 @@ class GymResolvers:
                         match_confidence=gym_data["confidence"],
                         rating=gym_data.get("rating"),
                         review_count=gym_data.get("review_count", 0),
-                        source_zipcode=gym_data.get("source_zipcode"),
+                        source_city=location,
                         metropolitan_area_code=gym_data.get("metropolitan_area_code"),
                         raw_data=gym_data.get("raw_data"),
                     )
@@ -424,7 +474,7 @@ class GymResolvers:
                 )
                 for review in gym.reviews
             ],
-            source_zipcode=gym.source_zipcode,
+            source_city=gym.source_city,
             metropolitan_area_code=gym.metropolitan_area_code,
             created_at=gym.created_at,
             updated_at=gym.updated_at,
@@ -464,7 +514,7 @@ class MetroResolvers:
                         population=metro.get("population"),
                         density_category=metro["density_category"],
                         market_characteristics=metro["market_characteristics"],
-                        zip_codes=metro["zip_codes"],
+                        cities=metro.get("cities", []),
                         statistics=stats,
                     )
         except Exception:
@@ -515,7 +565,7 @@ class MutationResolvers:
     """Resolvers for GraphQL mutations"""
 
     @staticmethod
-    async def import_gym_data(zipcode: str, data: List) -> ImportResult:
+    async def import_gym_data(location: str, data: List) -> ImportResult:
         """Import gym data from CLI search results"""
         try:
             gyms_imported = 0
@@ -563,7 +613,7 @@ class MutationResolvers:
                                 match_confidence=gym_data.confidence,
                                 rating=gym_data.rating,
                                 review_count=gym_data.review_count or 0,
-                                source_zipcode=zipcode,
+                                source_city=location,
                                 raw_data={"imported": True},
                             )
                             session.add(new_gym)
@@ -591,3 +641,170 @@ class MutationResolvers:
                 errors=[f"Import failed: {str(e)}"],
                 import_duration_seconds=0.0,
             )
+
+    @staticmethod
+    async def trigger_gym_search(location: str, radius: float = 10.0) -> str:
+        """
+        Trigger a gym search for a location.
+        Returns a search_id to track progress via subscription.
+        """
+        import asyncio
+
+        # Create search in progress manager
+        search_id = search_progress_manager.create_search(location, radius)
+
+        # Start the search asynchronously
+        asyncio.create_task(
+            MutationResolvers._perform_gym_search(search_id, location, radius)
+        )
+
+        return search_id
+
+    @staticmethod
+    async def _perform_gym_search(search_id: str, location: str, radius: float):
+        """Perform the actual gym search with progress updates."""
+        import asyncio
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        # Set a 5-minute timeout for the entire search operation
+        search_timeout = 300  # 5 minutes
+
+        try:
+            # Run the search with a timeout
+            await asyncio.wait_for(
+                MutationResolvers._perform_gym_search_internal(
+                    search_id, location, radius
+                ),
+                timeout=search_timeout,
+            )
+        except asyncio.TimeoutError:
+            logger.error(f"Search {search_id} timed out after {search_timeout} seconds")
+            await search_progress_manager.update_progress(
+                search_id,
+                "error",
+                0.0,
+                "Search timed out",
+                message=f"Search operation exceeded {search_timeout} seconds",
+            )
+        except Exception as e:
+            logger.error(f"Search failed: {e}")
+            await search_progress_manager.update_progress(
+                search_id, "error", 0.0, "Search failed", message=str(e)
+            )
+
+    @staticmethod
+    async def _perform_gym_search_internal(
+        search_id: str, location: str, radius: float
+    ):
+        """Internal method to perform the actual gym search."""
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        try:
+            # Step 1: Geocoding (10% progress)
+            await search_progress_manager.update_progress(
+                search_id, "geocoding", 10.0, "Converting location to coordinates"
+            )
+
+            location_info = await geocoding_service.search_location(location)
+
+            if not location_info:
+                await search_progress_manager.update_progress(
+                    search_id,
+                    "error",
+                    10.0,
+                    "Location not found",
+                    message=f"Could not find location: {location}",
+                )
+                return
+
+            # Update with location info
+            await search_progress_manager.update_progress(
+                search_id,
+                "searching",
+                20.0,
+                "Location found",
+                location_info=location_info,
+            )
+
+            search_location = location
+
+            # Step 2: Check database (30% progress)
+            await search_progress_manager.update_progress(
+                search_id, "searching", 30.0, "Checking existing data"
+            )
+
+            async with get_db_session() as session:
+                # Check if we already have gyms for this city
+                query = select(Gym).where(Gym.source_city == search_location).limit(1)
+                result = await session.execute(query)
+                existing_gym = result.scalar_one_or_none()
+
+                if existing_gym:
+                    # We already have data
+                    await search_progress_manager.update_progress(
+                        search_id,
+                        "complete",
+                        100.0,
+                        "Search complete",
+                        message="Found existing gym data in database",
+                    )
+                    return
+
+            # Step 3: Search Yelp (50% progress)
+            await search_progress_manager.update_progress(
+                search_id, "searching_yelp", 50.0, "Searching Yelp for gyms"
+            )
+
+            # Step 4: Search Google (70% progress)
+            await search_progress_manager.update_progress(
+                search_id, "searching_google", 70.0, "Searching Google Places"
+            )
+
+            # Step 5: Perform actual CLI search
+            try:
+                # TODO: Update CLI to support city-based search
+                logger.warning(
+                    f"CLI search not yet supported for city: {search_location}"
+                )
+                await search_progress_manager.update_progress(
+                    search_id,
+                    "error",
+                    90.0,
+                    "CLI search not available",
+                    message="City-based CLI search not yet implemented",
+                )
+                return
+
+                # Step 6: Merge and store results (90% progress)
+                await search_progress_manager.update_progress(
+                    search_id, "merging", 90.0, "Merging and storing results"
+                )
+
+                # await GymResolvers._store_cli_results(cli_result)
+
+                # Complete (100% progress)
+                gym_count = 0  # len(cli_result.get("gyms", []))
+                await search_progress_manager.update_progress(
+                    search_id,
+                    "complete",
+                    100.0,
+                    "Search complete",
+                    message=f"Found {gym_count} gyms",
+                )
+
+            except Exception as e:
+                logger.error(f"CLI search failed: {e}")
+                await search_progress_manager.update_progress(
+                    search_id, "error", 90.0, "Search failed", message=str(e)
+                )
+
+        except Exception as e:
+            logger.error(f"Search failed: {e}")
+            await search_progress_manager.update_progress(
+                search_id, "error", 0.0, "Search failed", message=str(e)
+            )
+            raise  # Re-raise to be caught by timeout handler

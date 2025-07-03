@@ -24,7 +24,7 @@ if config.config_file_name is not None:
 # Set the SQLAlchemy URL from environment variable if available
 database_url = os.getenv(
     "DATABASE_URL",
-    "postgresql://gymintel:gymintel_dev@database:5432/gymintel",  # pragma: allowlist secret  # noqa: E501
+    "postgresql://gymintel:gymintel_dev@localhost:5432/gymintel",  # pragma: allowlist secret  # noqa: E501
 )
 config.set_main_option("sqlalchemy.url", database_url)
 

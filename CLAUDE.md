@@ -18,13 +18,13 @@
    - Updated railway.toml configuration
 
 3. **Gym Search Feature** ✅
-   - Implemented location-based search (city or zipcode)
+   - Implemented location-based search (originally city or zipcode)
    - Added real-time progress tracking with GraphQL subscriptions
    - Created geocoding service using geopy
    - Added `trigger_gym_search` mutation and `search_progress` subscription
    - PR created: https://github.com/a-deal/gymintel-web/pull/9
 
-4. **Environment Strategy Update** 🚧
+4. **Environment Strategy Update** ✅
    - Restructured from 2 environments to 3:
      - Development: Local (localhost)
      - Staging: Testing & integration
@@ -32,14 +32,23 @@
    - Renamed all "development" references to "staging"
    - Updated all configuration files and documentation
    - Created separate deployment workflows
+   - Successfully created staging environments on Vercel and Railway
 
-### Current Task: Setting Up Staging Environments
-- About to create separate Vercel project for staging (gymintel-web-staging)
-- About to create separate Railway project for staging (gymintel-backend-staging)
-- Will configure environment variables for both
-- Will set up GitHub secrets for CI/CD
+5. **City-Based Search Implementation** ✅
+   - Removed ALL ZIP code references from the codebase
+   - Implemented city-based search using PostGIS geographic queries
+   - Added Google Places API integration for city autocomplete
+   - Created Material-UI autocomplete components for city search
+   - Updated all GraphQL schemas, queries, mutations, and subscriptions
+   - Created database migrations to transition schema
+   - Updated Analytics page to use cities instead of ZIP codes
+   - PR branch: feature/gym-search-with-progress
 
-### Environment URLs (To Be Created):
+### Current Task: UI Redesign
+- Ready to begin UI/UX improvements
+- Focus areas to be determined
+
+### Environment URLs:
 | Environment | Frontend | Backend | Branch |
 |------------|----------|---------|--------|
 | Development | http://localhost:3000 | http://localhost:8000 | feature/* |
@@ -66,11 +75,22 @@ main branch → Production Environment (auto-deploy)
 - `/frontend/.env.staging` - Staging configuration
 - `/frontend/vercel.staging.json` - Staging-specific Vercel config
 - `/backend/railway.staging.toml` - Staging-specific Railway config
+- `/backend/app/services/city_boundaries.py` - PostGIS city boundary queries
+- `/backend/app/services/google_places.py` - Google Places API integration
+- `/frontend/src/components/SearchInputMUISimple.tsx` - Material-UI autocomplete
+- `/backend/migrations/versions/*` - Database migration files
+- `/docs/GOOGLE_PLACES_SETUP.md` - Google Places API setup guide
 
-### Next Steps:
-1. Create Vercel staging project (gymintel-web-staging)
-2. Create Railway staging project (gymintel-backend-staging)
-3. Configure environment variables for both platforms
-4. Set up GitHub secrets for automated deployments
-5. Create and push staging branch
-6. Test deployments
+### Key Technical Implementations:
+1. **PostGIS Integration**: Using spatial queries for accurate city boundary searches
+2. **Google Places API**: Autocomplete and validation for city names
+3. **Material-UI Components**: Professional autocomplete UI with debouncing
+4. **Database Migrations**: Smooth transition from ZIP code to location-based schema
+5. **GraphQL Schema Evolution**: Complete type system update for location-based search
+
+### Next Steps for UI Redesign:
+1. Define design system and component library
+2. Create mockups for key pages (Search, Results, Analytics)
+3. Implement responsive layouts
+4. Add animations and transitions
+5. Improve data visualization components

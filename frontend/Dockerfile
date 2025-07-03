@@ -1,5 +1,32 @@
-# GymIntel Frontend Production Dockerfile
-FROM node:18-alpine AS builder
+# GymIntel Frontend Dockerfile
+
+# Development stage - Used for CI/CD testing only
+# For local development with hot-reload, use docker-compose.yml which mounts
+# the source code as a volume. This stage copies files at build time, so it
+# won't hot-reload without volume mounts.
+# Example for hot-reload: docker run -v $(pwd):/app -v /app/node_modules myimage:dev
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --include=dev
+
+# Copy application code - Required for CI builds
+# Note: In local dev, this gets overridden by volume mount
+COPY . .
+
+# Expose development port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+
+# Builder stage for production
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app

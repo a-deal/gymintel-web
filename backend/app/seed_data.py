@@ -31,7 +31,7 @@ SAMPLE_METRO_AREAS = [
         "title": "Austin-Round Rock-Georgetown, TX Metropolitan Statistical Area",
         "population": 2283371,
         "land_area_sq_miles": 4279.5,
-        "zipcodes": ["78701", "78702", "78703", "78704", "78705"],
+        "cities": ["Austin", "Round Rock", "Cedar Park", "Georgetown", "Pflugerville"],
     },
     {
         "code": "sf-ca",
@@ -39,7 +39,7 @@ SAMPLE_METRO_AREAS = [
         "title": "San Francisco-Oakland-Berkeley, CA Metropolitan Statistical Area",
         "population": 4749008,
         "land_area_sq_miles": 2474.0,
-        "zipcodes": ["94102", "94103", "94104", "94105", "94107"],
+        "cities": ["San Francisco", "Oakland", "Berkeley", "San Jose", "Palo Alto"],
     },
     {
         "code": "nyc-ny",
@@ -47,7 +47,7 @@ SAMPLE_METRO_AREAS = [
         "title": "New York-Newark-Jersey City, NY-NJ-PA Metropolitan Statistical Area",
         "population": 8336817,
         "land_area_sq_miles": 302.6,
-        "zipcodes": ["10001", "10002", "10003", "10004", "10005"],
+        "cities": ["New York", "Brooklyn", "Queens", "Bronx", "Staten Island"],
     },
 ]
 
@@ -65,7 +65,7 @@ SAMPLE_GYMS = [
         "match_confidence": 0.92,
         "rating": 4.5,
         "review_count": 328,
-        "source_zipcode": "78701",
+        "source_city": "Austin",
         "metropolitan_area_code": "austin-tx",
     },
     {
@@ -80,7 +80,7 @@ SAMPLE_GYMS = [
         "match_confidence": 0.85,
         "rating": 4.8,
         "review_count": 156,
-        "source_zipcode": "78701",
+        "source_city": "Austin",
         "metropolitan_area_code": "austin-tx",
     },
     # Medium confidence gyms (0.5-0.8)
@@ -96,7 +96,7 @@ SAMPLE_GYMS = [
         "match_confidence": 0.68,
         "rating": 4.2,
         "review_count": 89,
-        "source_zipcode": "78704",
+        "source_city": "Austin",
         "metropolitan_area_code": "austin-tx",
     },
     # Low confidence gyms (0.0-0.5)
@@ -112,7 +112,7 @@ SAMPLE_GYMS = [
         "match_confidence": 0.30,
         "rating": None,
         "review_count": 0,
-        "source_zipcode": "78702",
+        "source_city": "Austin",
         "metropolitan_area_code": "austin-tx",
     },
 ]
@@ -172,8 +172,8 @@ async def seed_metro_areas(session: AsyncSession) -> Dict[str, MetropolitanArea]
     metro_map = {}
 
     for metro_data in SAMPLE_METRO_AREAS:
-        # Extract zipcodes (not a model field)
-        zipcodes = metro_data.pop("zipcodes", [])
+        # Extract cities (not a model field)
+        cities = metro_data.pop("cities", [])
 
         # Check if already exists
         result = await session.execute(
@@ -193,8 +193,8 @@ async def seed_metro_areas(session: AsyncSession) -> Dict[str, MetropolitanArea]
 
         metro_map[metro.code] = metro
 
-        # Add zipcodes back for gym seeding reference
-        metro_data["zipcodes"] = zipcodes
+        # Add cities back for gym seeding reference
+        metro_data["cities"] = cities
 
     await session.commit()
     return metro_map
@@ -363,7 +363,7 @@ async def import_from_cli_export(json_file_path: str) -> None:
                     match_confidence=gym_data.get("match_confidence", 0.5),
                     rating=gym_data.get("rating"),
                     review_count=gym_data.get("review_count", 0),
-                    source_zipcode=gym_data.get("zipcode"),
+                    source_city=gym_data.get("source_city"),
                     raw_data=gym_data,
                     created_at=datetime.utcnow(),
                     updated_at=datetime.utcnow(),
@@ -385,55 +385,58 @@ async def import_from_cli_export(json_file_path: str) -> None:
         logger.info(f"Imported {imported_count} new gyms from CLI export")
 
 
-async def refresh_gym_data(zipcode: str) -> None:
-    """Refresh gym data for a specific zipcode using CLI integration."""
-    logger.info(f"Refreshing gym data for zipcode: {zipcode}")
+async def refresh_gym_data(location: str) -> None:
+    """Refresh gym data for a specific location using CLI integration."""
+    logger.info(f"Refreshing gym data for location: {location}")
 
     try:
         # Import CLI search function
-        from cli_services.run_gym_search import run_gym_search
+        # from cli_services.run_gym_search import run_gym_search
 
         # Run search
-        result = await run_gym_search(zipcode, quiet=True)
+        # TODO: Update to use city-based search when CLI supports it
+        # For now, this function is disabled
+        logger.warning("City-based refresh not yet implemented")
+        return
 
-        if result and "gyms" in result:
-            # Import the fresh data
-            async with get_db_session() as session:
-                updated_count = 0
-
-                for gym_data in result["gyms"]:
-                    # Update or create gym
-                    result = await session.execute(
-                        select(Gym).where(
-                            Gym.name == gym_data["name"],
-                            Gym.source_zipcode == zipcode,
-                        )
-                    )
-                    gym = result.scalar_one_or_none()
-
-                    if gym:
-                        # Update existing
-                        gym.confidence = gym_data.get(
-                            "confidence_score", gym.confidence
-                        )
-                        gym.rating = gym_data.get("rating", gym.rating)
-                        gym.review_count = gym_data.get(
-                            "review_count", gym.review_count
-                        )
-                        gym.updated_at = datetime.utcnow()
-                        updated_count += 1
-                    else:
-                        # Create new (use import logic)
-                        # ... (similar to import_from_cli_export)
-                        pass
-
-                await session.commit()
-                logger.info(f"Updated {updated_count} gyms for zipcode {zipcode}")
+        # if result and "gyms" in result:
+        #     # Import the fresh data
+        #     async with get_db_session() as session:
+        #         updated_count = 0
+        #
+        #         for gym_data in result["gyms"]:
+        #                 # Update or create gym
+        #                 result = await session.execute(
+        #                     select(Gym).where(
+        #                         Gym.name == gym_data["name"],
+        #                         Gym.source_city == location,
+        #                     )
+        #                 )
+        #                 gym = result.scalar_one_or_none()
+        #
+        #                 if gym:
+        #                     # Update existing
+        #                     gym.confidence = gym_data.get(
+        #                         "confidence_score", gym.confidence
+        #                     )
+        #                     gym.rating = gym_data.get("rating", gym.rating)
+        #                     gym.review_count = gym_data.get(
+        #                         "review_count", gym.review_count
+        #                     )
+        #                     gym.updated_at = datetime.utcnow()
+        #                     updated_count += 1
+        #                 else:
+        #                     # Create new (use import logic)
+        #                     # ... (similar to import_from_cli_export)
+        #                     pass
+        #
+        #         await session.commit()
+        #         logger.info(f"Updated {updated_count} gyms for location {location}")
 
     except ImportError:
         logger.warning("CLI services not available for data refresh")
     except Exception as e:
-        logger.error(f"Error refreshing data for {zipcode}: {e}")
+        logger.error(f"Error refreshing data for {location}: {e}")
 
 
 # Main seeding function

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { MarketGap } from '../types/gym';
 import { useQuery } from '@apollo/client';
 import { GET_GYM_ANALYTICS, MARKET_GAP_ANALYSIS } from '../graphql/queries';
+import { SearchInputMUISimple } from '../components/SearchInputMUISimple';
 import {
   ChartBarIcon,
   MapPinIcon,
@@ -28,29 +29,29 @@ import {
 } from 'recharts';
 
 export const AnalyticsPage = () => {
-  const [zipcode, setZipcode] = useState('');
-  const [activeZipcode, setActiveZipcode] = useState('');
+  const [location, setLocation] = useState('');
+  const [activeLocation, setActiveLocation] = useState('');
 
   const { data: analyticsData, loading: analyticsLoading, error: analyticsError } = useQuery(
     GET_GYM_ANALYTICS,
     {
-      variables: { zipcode: activeZipcode },
-      skip: !activeZipcode,
+      variables: { location: activeLocation },
+      skip: !activeLocation,
     }
   );
 
   const { data: gapData } = useQuery(
     MARKET_GAP_ANALYSIS,
     {
-      variables: { zipcode: activeZipcode, radius: 10 },
-      skip: !activeZipcode,
+      variables: { location: activeLocation, radius: 10 },
+      skip: !activeLocation,
     }
   );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (zipcode.trim()) {
-      setActiveZipcode(zipcode.trim());
+    if (location.trim()) {
+      setActiveLocation(location.trim());
     }
   };
 
@@ -98,17 +99,20 @@ export const AnalyticsPage = () => {
           {/* Search Form */}
           <form onSubmit={handleSearch} className="mt-6 flex gap-4">
             <div className="flex-1 max-w-lg">
-              <input
-                type="text"
-                placeholder="Enter ZIP code for analytics"
-                value={zipcode}
-                onChange={(e) => setZipcode(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-gym-blue-500 focus:ring-gym-blue-500 sm:text-sm"
+              <SearchInputMUISimple
+                value={location}
+                onChange={setLocation}
+                onSubmit={() => {
+                  if (location.trim()) {
+                    setActiveLocation(location.trim());
+                  }
+                }}
+                placeholder="Enter city name for analytics"
               />
             </div>
             <button
               type="submit"
-              disabled={analyticsLoading || !zipcode.trim()}
+              disabled={analyticsLoading || !location.trim()}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gym-blue-600 hover:bg-gym-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gym-blue-500 disabled:opacity-50"
             >
               {analyticsLoading ? (
@@ -124,12 +128,12 @@ export const AnalyticsPage = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Empty State */}
-        {!activeZipcode && (
+        {!activeLocation && (
           <div className="text-center py-12">
             <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No analytics yet</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Enter a ZIP code to get detailed gym market analytics
+              Enter a city name to get detailed gym market analytics
             </p>
           </div>
         )}
@@ -225,10 +229,10 @@ export const AnalyticsPage = () => {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          ZIP Code
+                          Location
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
-                          {analytics.zipcode}
+                          {analytics.location}
                         </dd>
                       </dl>
                     </div>

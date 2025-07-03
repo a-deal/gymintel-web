@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with PostGIS extension
+  database:
+    image: postgis/postgis:15-3.3
+    container_name: gymintel-db
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-gymintel}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-gymintel_dev}
+      POSTGRES_DB: ${DATABASE_NAME:-gymintel}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-gymintel} -d ${DATABASE_NAME:-gymintel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI backend with GraphQL
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: gymintel-backend
+    env_file:
+      - ../.env.local
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=${DATABASE_NAME:-gymintel}
+      - DATABASE_USER=${DATABASE_USER:-gymintel}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-gymintel_dev}
+      - YELP_API_KEY=${YELP_API_KEY}
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - ENVIRONMENT=${ENVIRONMENT:-testing}
+      - AUTO_INIT_DB=${AUTO_INIT_DB:-true}
+      - SEED_DATABASE=${SEED_DATABASE:-false}
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React frontend
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: gymintel-frontend
+    env_file:
+      - ../.env.local
+    environment:
+      - VITE_GRAPHQL_ENDPOINT=http://localhost:8000/graphql
+      - VITE_MAPBOX_ACCESS_TOKEN=${MAPBOX_ACCESS_TOKEN}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: gymintel-network

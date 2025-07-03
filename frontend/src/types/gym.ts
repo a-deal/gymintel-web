@@ -35,14 +35,14 @@ export interface Gym {
   reviewCount?: number;
   sources: DataSource[];
   reviews: Review[];
-  sourceZipcode?: string;
+  sourceCity?: string;
   metropolitanAreaCode?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface SearchResult {
-  zipcode: string;
+  location: string;
   coordinates: Coordinates;
   radiusMiles: number;
   timestamp: string;
@@ -62,7 +62,7 @@ export interface MetroStatistics {
   mergeRate: number;
   averageConfidence: number;
   sourceDistribution: string; // JSON string
-  gymsPerZip: string; // JSON string
+  gymsPerCity: string; // JSON string
   deduplicationRate: number;
 }
 
@@ -75,12 +75,12 @@ export interface MetropolitanArea {
   population?: number;
   densityCategory: string;
   marketCharacteristics: string[];
-  zipCodes: string[];
+  cities: string[];
   statistics: MetroStatistics;
 }
 
 export interface GymAnalytics {
-  zipcode: string;
+  location: string;
   totalGyms: number;
   confidenceDistribution: string; // JSON string
   sourceBreakdown: string; // JSON string
@@ -126,7 +126,7 @@ export interface ImportResult {
 export interface SavedSearch {
   id: string;
   userId: string;
-  zipcode: string;
+  location: string;
   radius: number;
   name?: string;
   createdAt: string;

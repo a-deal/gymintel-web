@@ -10,6 +10,7 @@ import { SEARCH_GYMS } from '../graphql/queries';
 import { GymCard } from '../components/GymCard';
 import { SearchFilters } from '../components/SearchFilters';
 import { MapView } from '../components/MapView';
+import { SearchInputMUISimple } from '../components/SearchInputMUISimple';
 import { SearchFilters as SearchFiltersType } from '../types/gym';
 import {
   MagnifyingGlassIcon,
@@ -20,7 +21,7 @@ import {
 
 export const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [zipcode, setZipcode] = useState(searchParams.get('zipcode') || '');
+  const [location, setLocation] = useState(searchParams.get('location') || '');
   const [radius, setRadius] = useState(Number(searchParams.get('radius')) || 10);
   const [filters, setFilters] = useState<SearchFiltersType>({});
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
@@ -28,23 +29,23 @@ export const SearchPage = () => {
 
   const { data, loading, error, refetch } = useQuery(SEARCH_GYMS, {
     variables: {
-      zipcode,
+      location,
       radius,
       limit: 50,
       filters: Object.keys(filters).length > 0 ? filters : null,
     },
-    skip: !zipcode,
+    skip: !location,
   });
 
   useEffect(() => {
-    if (zipcode) {
-      setSearchParams({ zipcode, radius: radius.toString() });
+    if (location) {
+      setSearchParams({ location, radius: radius.toString() });
     }
-  }, [zipcode, radius, setSearchParams]);
+  }, [location, radius, setSearchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (zipcode.trim()) {
+    if (location.trim()) {
       refetch();
     }
   };
@@ -95,12 +96,15 @@ export const SearchPage = () => {
         {/* Search Form */}
         <form onSubmit={handleSearch} className="mt-4 flex gap-4">
           <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Enter ZIP code"
-              value={zipcode}
-              onChange={(e) => setZipcode(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            <SearchInputMUISimple
+              value={location}
+              onChange={setLocation}
+              onSubmit={() => {
+                if (location.trim()) {
+                  refetch();
+                }
+              }}
+              placeholder="Enter city name"
             />
           </div>
           <div className="w-32">
@@ -118,7 +122,7 @@ export const SearchPage = () => {
           </div>
           <button
             type="submit"
-            disabled={loading || !zipcode.trim()}
+            disabled={loading || !location.trim()}
             className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
@@ -132,7 +136,7 @@ export const SearchPage = () => {
         {/* Search Stats */}
         {searchResult && (
           <div className="mt-4 text-sm text-gray-600">
-            Found {searchResult.totalResults} gyms in {zipcode} ({radius} mile radius) •
+            Found {searchResult.totalResults} gyms in {searchResult.location || location} ({radius} mile radius) •
             {searchResult.mergedCount} merged records •
             {Math.round(searchResult.avgConfidence * 100)}% avg confidence •
             {searchResult.executionTimeSeconds.toFixed(1)}s
@@ -161,12 +165,12 @@ export const SearchPage = () => {
             </div>
           )}
 
-          {!zipcode && !loading && (
+          {!location && !loading && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <MagnifyingGlassIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Enter a ZIP code to search for gyms
+                  Enter a city or ZIP code to search for gyms
                 </h3>
                 <p className="text-gray-600">
                   Use intelligent filtering and confidence scoring to find the best gym matches.
@@ -200,7 +204,7 @@ export const SearchPage = () => {
             </div>
           )}
 
-          {!loading && zipcode && gyms.length === 0 && !error && (
+          {!loading && location && gyms.length === 0 && !error && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <MagnifyingGlassIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />

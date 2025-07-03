@@ -109,7 +109,7 @@ export const MetroPage = () => {
                       {metro.name}
                     </h3>
                     <p className="text-sm text-gray-600 truncate">
-                      {metro.state} • {metro.zipCodes.length} ZIP codes
+                      {metro.state} • {metro.cities.length} cities
                     </p>
                     {metro.population && (
                       <p className="text-xs text-gray-500">

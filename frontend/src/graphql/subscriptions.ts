@@ -8,8 +8,8 @@ import { GYM_FRAGMENT } from './queries';
 // Subscribe to gym updates for a specific area
 export const GYM_UPDATES_SUBSCRIPTION = gql`
   ${GYM_FRAGMENT}
-  subscription GymUpdates($zipcode: String!) {
-    gymUpdates(zipcode: $zipcode) {
+  subscription GymUpdates($location: String!) {
+    gymUpdates(location: $location) {
       ...GymFragment
     }
   }
@@ -24,6 +24,8 @@ export const SEARCH_PROGRESS_SUBSCRIPTION = gql`
       progressPercentage
       currentStep
       estimatedCompletion
+      message
+      locationInfo
     }
   }
 `;
