@@ -1,4 +1,26 @@
-# GymIntel Frontend Production Dockerfile
+# GymIntel Frontend Dockerfile
+
+# Development stage
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy application code
+COPY . .
+
+# Expose development port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+
+# Builder stage for production
 FROM node:18-alpine AS builder
 
 # Set working directory
