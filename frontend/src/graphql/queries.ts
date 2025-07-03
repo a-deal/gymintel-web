@@ -98,7 +98,7 @@ export const GET_METROPOLITAN_AREA = gql`
       population
       densityCategory
       marketCharacteristics
-      zipCodes
+      cities
       statistics {
         totalGyms
         mergedGyms
@@ -124,7 +124,7 @@ export const LIST_METROPOLITAN_AREAS = gql`
       population
       densityCategory
       marketCharacteristics
-      zipCodes
+      cities
       statistics {
         totalGyms
         mergedGyms

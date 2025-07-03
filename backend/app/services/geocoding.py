@@ -124,17 +124,17 @@ class GeocodingService:
                         "city": self._extract_city(address),
                         "state": address.get("state"),
                     }
-                else:
-                    # If no zipcode in result, try to get representative zipcode
-                    # by searching for the city center
-                    logger.info(f"No zipcode found for {city}, using coordinates")
-                    return None, {
-                        "latitude": location.latitude,
-                        "longitude": location.longitude,
-                        "display_name": location.address,
-                        "city": self._extract_city(address),
-                        "state": address.get("state"),
-                    }
+
+                # If no zipcode in result, try to get representative zipcode
+                # by searching for the city center
+                logger.info(f"No zipcode found for {city}, using coordinates")
+                return None, {
+                    "latitude": location.latitude,
+                    "longitude": location.longitude,
+                    "display_name": location.address,
+                    "city": self._extract_city(address),
+                    "state": address.get("state"),
+                }
 
         except (GeocoderTimedOut, GeocoderServiceError) as e:
             logger.error(f"Geocoding error for city {city}: {e}")

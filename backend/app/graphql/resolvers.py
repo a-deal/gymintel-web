@@ -48,20 +48,7 @@ class GymResolvers:
 
         if not location_info:
             # Could not geocode the location
-            return SearchResult(
-                location=location,
-                coordinates=Coordinates(latitude=0.0, longitude=0.0),
-                radius_miles=radius,
-                timestamp=datetime.utcnow(),
-                gyms=[],
-                total_results=0,
-                yelp_results=0,
-                google_results=0,
-                merged_count=0,
-                avg_confidence=0.0,
-                execution_time_seconds=0.0,
-                use_google=True,
-            )
+            raise Exception(f"Could not find location: {location}")
 
         # Location is passed as parameter to this function
 

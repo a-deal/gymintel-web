@@ -371,17 +371,29 @@ class Subscription:
         import asyncio
 
         await asyncio.sleep(1)
-        # This is a placeholder that would never actually yield
-        # In a real implementation, this would connect to a message queue or
-        # database changes
-        return  # This will never execute, but satisfies the type checker
-        yield  # Unreachable code, but keeps the async generator signature
+        # This is a placeholder implementation
+        # In production, this would yield real gym updates from a message queue
+        while False:  # Type-safe way to indicate this is an async generator
+            yield Gym(
+                id="placeholder",
+                name="placeholder",
+                address="placeholder",
+                price_per_month=0.0,
+                rating=0.0,
+                review_count=0,
+                latitude=0.0,
+                longitude=0.0,
+                source="yelp",
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            )  # Never executes but maintains generator signature
 
     @strawberry.subscription
     async def search_progress(self, search_id: str) -> SearchProgress:
         """Subscribe to search progress updates"""
         from ..services.search_progress import search_progress_manager
 
+        queue = None
         try:
             # Subscribe to updates for this search
             queue = await search_progress_manager.subscribe(search_id)
@@ -406,7 +418,7 @@ class Subscription:
             )
         finally:
             # Clean up subscription
-            if "queue" in locals():
+            if queue is not None:
                 search_progress_manager.unsubscribe(search_id, queue)
 
 
